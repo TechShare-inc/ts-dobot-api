@@ -1,60 +1,69 @@
-"""V4 adapter — wraps ``dobot_api_v4.DobotRobot`` behind :class:`DobotProtocol`."""
+"""V4 robot implementation — wraps ``dobot_api_v4.DobotRobot`` directly."""
 
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from ..protocol import DobotProtocol
-from ..types import Pose
+from ._v4_mixins import V4CheckMixin, V4ConveyorMixin, V4ForceMixin, V4WeldingMixin
+from ._v4_mixins._helpers import _opt, _pose_from_v4
+from .models import ApiVersion
+from .robot import DobotRobot
+from .types import Pose
+
+if TYPE_CHECKING:
+    import numpy as np
+    from dobot_api_v4 import DobotApiDashboard as V4Dashboard
+    from dobot_api_v4 import DobotApiFeedback as V4Feedback
+    from dobot_api_v4 import DobotRobot as V4Robot
+    from dobot_api_v4 import FeedbackData as V4FeedbackData
+
+# -- DobotRobotV4 ---------------------------------------------------------
 
 
-def _pose_from_v4(p: Any) -> Pose:
-    """Convert a V4 ``Pose`` dataclass to our unified Pose."""
-    return Pose(x=p.x, y=p.y, z=p.z, rx=p.rx, ry=p.ry, rz=p.rz)
+class DobotRobotV4(
+    V4ForceMixin,
+    V4WeldingMixin,
+    V4ConveyorMixin,
+    V4CheckMixin,
+    DobotRobot,
+):
+    """Dobot robot using the V4 protocol (CR / Nova 2s / Nova NG series).
 
-
-def _opt(value: Any, default: int = -1) -> int:
-    """Convert ``None`` → V4's sentinel default (``-1``)."""
-    return default if value is None else value
-
-
-class V4Adapter(DobotProtocol):
-    """Adapter that wraps the ``dobot_api_v4`` SDK.
-
-    Supports: CR series, Nova 2s, Nova NG series robots.
+    Wraps ``dobot_api_v4.DobotRobot`` directly — no adapter layer.
+    Includes V4-only extension methods (force control, welding,
+    conveyor tracking, motion checks) via mixins.
     """
 
-    def __init__(self, ip: str, *, language: str = "en") -> None:
-        self._ip = ip
-        self._language = language
-        self._robot: Any = None  # Lazy — created in connect()
+    _api_version = ApiVersion.V4
+
+    def __init__(self, ip: str, model: str, *, language: str = "en") -> None:
+        super().__init__(ip, model, language=language)
+
+        from dobot_api_v4 import DobotRobot as V4Robot
+
+        self._native: V4Robot = V4Robot(ip, language=language)
 
     @property
-    def native(self) -> Any:
-        """Access the underlying ``dobot_api_v4.DobotRobot`` instance."""
-        if self._robot is None:
-            raise RuntimeError("Not connected. Call connect() first.")
-        return self._robot
+    def dashboard(self) -> V4Dashboard:
+        """Access the underlying V4 dashboard object directly."""
+        return self._native.dashboard
 
     # ==================================================================
     # Lifecycle
     # ==================================================================
 
-    def connect(self) -> None:
-        from dobot_api_v4 import DobotRobot as V4Robot
-
-        self._robot = V4Robot(self._ip, language=self._language)
-
     def disconnect(self) -> None:
-        if self._robot is not None:
-            self._robot.close()
-            self._robot = None
+        """Close all TCP connections."""
+        if self._native is not None:
+            self._native.close()
+            self._native = None  # type: ignore[assignment]
 
     def reconnect(self) -> None:
-        self.native.reconnect()
+        """Re-establish all TCP connections."""
+        self._native.reconnect()
 
     def startup(
         self,
@@ -68,28 +77,29 @@ class V4Adapter(DobotProtocol):
     ) -> None:
         """V4 startup — composed manually since there's no built-in startup()."""
         logger.info("V4 startup sequence starting")
-        has_errors = self.native.check_errors(language=self._language)
+        has_errors = self._native.check_errors(language=self._language)
         if has_errors:
             logger.info("Errors detected — clearing and powering on")
-            self.native.clear_error()
-            self.native.power_on()
+            self._native.clear_error()
+            self._native.power_on()
             logger.info(f"Waiting {power_on_wait}s for controller to power on")
             time.sleep(power_on_wait)
         else:
             logger.info("No errors detected — skipping clear_error and power_on")
-        self.native.disable_robot()
-        self.native.enable_robot(
+        self._native.disable_robot()
+        self._native.enable_robot(
             load=load,
             center_x=center_x,
             center_y=center_y,
             center_z=center_z,
         )
-        self.native.speed_factor(speed)
+        self._native.speed_factor(speed)
         logger.info("V4 startup sequence complete")
 
     def shutdown(self) -> None:
+        """Gracefully disable the robot arm."""
         logger.info("V4 shutdown: disabling robot")
-        self.native.disable_robot()
+        self._native.disable_robot()
 
     # ==================================================================
     # System
@@ -102,28 +112,34 @@ class V4Adapter(DobotProtocol):
         center_y: float = 0.0,
         center_z: float = 0.0,
     ) -> None:
-        self.native.enable_robot(
+        """Enable the robot."""
+        self._native.enable_robot(
             load=load, center_x=center_x, center_y=center_y, center_z=center_z
         )
 
     def disable_robot(self) -> None:
-        self.native.disable_robot()
+        """Disable the robot."""
+        self._native.disable_robot()
 
     def clear_error(self) -> None:
-        self.native.clear_error()
+        """Clear controller error/alarm information."""
+        self._native.clear_error()
 
     def reset_robot(self) -> None:
-        self.native.reset_robot()
+        """Reset the robot controller."""
+        self._native.reset_robot()
 
     def power_on(self) -> None:
-        self.native.power_on()
+        """Power on the robot."""
+        self._native.power_on()
 
     def emergency_stop(self) -> None:
-        # V4 requires a mode param; 0 = standard stop
-        self.native.emergency_stop(mode=0)
+        """Trigger an emergency stop."""
+        self._native.emergency_stop(mode=0)
 
     def speed_factor(self, speed: int) -> None:
-        self.native.speed_factor(speed)
+        """Set the global speed factor (1–100)."""
+        self._native.speed_factor(speed)
 
     # ==================================================================
     # Motion
@@ -144,7 +160,8 @@ class V4Adapter(DobotProtocol):
         user: int | None = None,
         tool: int | None = None,
     ) -> int:
-        return self.native.mov_j(
+        """Joint-space move to a Cartesian target."""
+        return self._native.mov_j(
             x,
             y,
             z,
@@ -174,7 +191,8 @@ class V4Adapter(DobotProtocol):
         user: int | None = None,
         tool: int | None = None,
     ) -> int:
-        return self.native.mov_l(
+        """Linear move."""
+        return self._native.mov_l(
             x,
             y,
             z,
@@ -203,8 +221,8 @@ class V4Adapter(DobotProtocol):
         accel: int | None = None,
         cp: int | None = None,
     ) -> int:
-        # V4 uses coordinate_mode=1 for joint targets
-        return self.native.mov_j(
+        """Joint-space move with joint-angle targets."""
+        return self._native.mov_j(
             j1,
             j2,
             j3,
@@ -230,7 +248,8 @@ class V4Adapter(DobotProtocol):
         lookahead_time: float = 50.0,
         gain: float = 500.0,
     ) -> int:
-        return self.native.servo_j(
+        """Servo (streaming) move in joint space."""
+        return self._native.servo_j(
             j1, j2, j3, j4, j5, j6, t=t, ahead_time=lookahead_time, gain=gain
         )
 
@@ -243,10 +262,12 @@ class V4Adapter(DobotProtocol):
         ry: float,
         rz: float,
     ) -> int:
-        return self.native.servo_p(x, y, z, rx, ry, rz)
+        """Servo (streaming) move in Cartesian space."""
+        return self._native.servo_p(x, y, z, rx, ry, rz)
 
     def move_jog(self, axis_id: str = "") -> int:
-        self.native.move_jog(axis_id=axis_id)
+        """Start or stop jog motion."""
+        self._native.move_jog(axis_id=axis_id)
         return 0  # V4 move_jog returns None
 
     def arc(
@@ -270,7 +291,8 @@ class V4Adapter(DobotProtocol):
         user: int | None = None,
         tool: int | None = None,
     ) -> int:
-        return self.native.arc(
+        """Circular arc move through two via-points."""
+        return self._native.arc(
             x1,
             y1,
             z1,
@@ -292,12 +314,13 @@ class V4Adapter(DobotProtocol):
         )
 
     def sync(self) -> None:
-        """V4 has no native sync(). Poll ``get_current_command_id()`` instead."""
-        # Simple polling approach — wait until the robot is idle.
-        # get_current_command_id() returns 0 when no command is active.
+        """Block until all queued motion commands have completed.
+
+        V4 has no native ``sync()`` — polls ``get_current_command_id()``.
+        """
         logger.debug("V4 sync: polling get_current_command_id()")
         while True:
-            cmd_id = self.native.get_current_command_id()
+            cmd_id = self._native.get_current_command_id()
             if cmd_id == 0:
                 break
             time.sleep(0.1)
@@ -320,7 +343,8 @@ class V4Adapter(DobotProtocol):
         speed: int | None = None,
         accel: int | None = None,
     ) -> int:
-        return self.native.dashboard.rel_mov_j_tool(
+        """Relative joint move in tool coordinate system."""
+        return self._native.dashboard.rel_mov_j_tool(
             offset_x,
             offset_y,
             offset_z,
@@ -347,7 +371,8 @@ class V4Adapter(DobotProtocol):
         speed: int | None = None,
         accel: int | None = None,
     ) -> int:
-        return self.native.dashboard.rel_mov_l_tool(
+        """Relative linear move in tool coordinate system."""
+        return self._native.dashboard.rel_mov_l_tool(
             offset_x,
             offset_y,
             offset_z,
@@ -373,7 +398,8 @@ class V4Adapter(DobotProtocol):
         speed: int | None = None,
         accel: int | None = None,
     ) -> int:
-        return self.native.dashboard.rel_mov_j_user(
+        """Relative joint move in user coordinate system."""
+        return self._native.dashboard.rel_mov_j_user(
             offset_x,
             offset_y,
             offset_z,
@@ -398,7 +424,8 @@ class V4Adapter(DobotProtocol):
         speed: int | None = None,
         accel: int | None = None,
     ) -> int:
-        return self.native.dashboard.rel_mov_l_user(
+        """Relative linear move in user coordinate system."""
+        return self._native.dashboard.rel_mov_l_user(
             offset_x,
             offset_y,
             offset_z,
@@ -422,7 +449,8 @@ class V4Adapter(DobotProtocol):
         speed: int | None = None,
         accel: int | None = None,
     ) -> int:
-        return self.native.dashboard.rel_joint_mov_j(
+        """Relative move with joint offsets."""
+        return self._native.dashboard.rel_joint_mov_j(
             j1,
             j2,
             j3,
@@ -438,19 +466,24 @@ class V4Adapter(DobotProtocol):
     # ==================================================================
 
     def vel_j(self, speed: int) -> None:
-        self.native.vel_j(speed)
+        """Set maximum joint velocity (%)."""
+        self._native.vel_j(speed)
 
     def vel_l(self, speed: int) -> None:
-        self.native.vel_l(speed)
+        """Set maximum Cartesian velocity (mm/s)."""
+        self._native.vel_l(speed)
 
     def acc_j(self, speed: int) -> None:
-        self.native.acc_j(speed)
+        """Set maximum joint acceleration (%)."""
+        self._native.acc_j(speed)
 
     def acc_l(self, speed: int) -> None:
-        self.native.acc_l(speed)
+        """Set maximum Cartesian acceleration (mm/s²)."""
+        self._native.acc_l(speed)
 
     def cp(self, ratio: int) -> None:
-        self.native.cp(ratio)
+        """Set continuous-path blending ratio."""
+        self._native.cp(ratio)
 
     def set_payload(
         self,
@@ -459,79 +492,96 @@ class V4Adapter(DobotProtocol):
         center_y: float = 0.0,
         center_z: float = 0.0,
     ) -> None:
-        self.native.dashboard.set_payload(
+        """Set the tool payload."""
+        self._native.dashboard.set_payload(
             load=weight, x=center_x, y=center_y, z=center_z
         )
 
     def set_collision_level(self, level: int) -> None:
-        self.native.dashboard.set_collision_level(level)
+        """Set collision detection sensitivity level."""
+        self._native.dashboard.set_collision_level(level)
 
     def set_user(self, index: int) -> None:
-        self.native.dashboard.user(index)
+        """Select the active user coordinate system."""
+        self._native.dashboard.user(index)
 
     def set_tool(self, index: int) -> None:
-        self.native.dashboard.tool(index)
+        """Select the active tool coordinate system."""
+        self._native.dashboard.tool(index)
 
     # ==================================================================
     # Query
     # ==================================================================
 
     def robot_mode(self) -> int:
-        return self.native.robot_mode()
+        """Return the current robot mode."""
+        return self._native.robot_mode()
 
     def get_pose(self) -> Pose:
-        return _pose_from_v4(self.native.get_pose())
+        """Return the current Cartesian pose."""
+        return _pose_from_v4(self._native.get_pose())
 
     def get_angle(self) -> Pose:
-        return _pose_from_v4(self.native.get_angle())
+        """Return the current joint angles (as a Pose with j1-j6 in x-rz)."""
+        return _pose_from_v4(self._native.get_angle())
 
     def get_error_id(self) -> tuple[int, ...]:
-        return self.native.get_error_id()
+        """Return a tuple of currently-active error IDs."""
+        return self._native.get_error_id()
 
     def start_drag(self) -> None:
-        self.native.start_drag()
+        """Enter drag/teach mode."""
+        self._native.start_drag()
 
     def stop_drag(self) -> None:
-        self.native.stop_drag()
+        """Exit drag/teach mode."""
+        self._native.stop_drag()
 
     # ==================================================================
     # I/O
     # ==================================================================
 
     def do_output(self, index: int, status: int) -> None:
-        self.native.do_output(index, status)
+        """Set a digital output."""
+        self._native.do_output(index, status)
 
     def tool_do(self, index: int, status: int) -> None:
-        self.native.dashboard.tool_do(index, status)
+        """Set a tool digital output."""
+        self._native.dashboard.tool_do(index, status)
 
     def ao(self, index: int, value: float) -> None:
-        self.native.ao(index, value)
+        """Set an analogue output."""
+        self._native.ao(index, value)
 
     def di(self, index: int) -> int:
-        return self.native.di(index)
+        """Read a digital input."""
+        return self._native.di(index)
 
     def tool_di(self, index: int) -> int:
-        return self.native.dashboard.tool_di(index)
+        """Read a tool digital input."""
+        return self._native.dashboard.tool_di(index)
 
     # ==================================================================
     # Feedback
     # ==================================================================
 
-    def feedback_data(self, port: int = 30004) -> Any | None:
+    def feedback_data(self, port: int = 30004) -> V4FeedbackData | None:
+        """Return the latest real-time feedback packet."""
         fb = self._get_feedback(port)
         return fb.feedback_data() if fb else None
 
-    def raw_feedback_data(self, port: int = 30004) -> Any | None:
+    def raw_feedback_data(self, port: int = 30004) -> np.ndarray | None:
+        """Return the raw numpy feedback array."""
         fb = self._get_feedback(port)
         return fb.raw_feedback_data() if fb else None
 
-    def _get_feedback(self, port: int) -> Any | None:
+    def _get_feedback(self, port: int) -> V4Feedback | None:
         if port == 30004:
-            return self.native.feedback
+            return self._native.feedback
         elif port == 30005:
-            return self.native.feedback_30005
+            return self._native.feedback_30005
         elif port == 30006:
-            return self.native.feedback_30006
+            return self._native.feedback_30006
         return None
 
     # ==================================================================
@@ -539,14 +589,17 @@ class V4Adapter(DobotProtocol):
     # ==================================================================
 
     def check_errors(self, language: str = "en") -> bool:
-        return self.native.check_errors(language=language)
+        """Return ``True`` if the controller has active alarms."""
+        return self._native.check_errors(language=language)
 
     def clear_and_recover(self, language: str = "en") -> bool:
-        return self.native.clear_robot_error(language=language)
+        """Attempt to clear errors. Returns ``True`` on success."""
+        return self._native.clear_robot_error(language=language)
 
     # ==================================================================
     # Raw
     # ==================================================================
 
     def send_raw(self, command: str) -> str:
-        return self.native.dashboard.send_recv_msg(command)
+        """Send a raw TCP command string and return the raw response."""
+        return self._native.dashboard.send_recv_msg(command)

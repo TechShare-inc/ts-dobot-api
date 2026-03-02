@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, TypeAlias
 
 # ---------------------------------------------------------------------------
 # Pose – always a dataclass, even though V3 uses plain tuples internally.
@@ -44,7 +44,11 @@ class Pose:
 # merge them into a single schema – the adapters return the native object
 # and we type-alias it here for documentation purposes.
 
-FeedbackData = Any  # Runtime alias; see protocol.py for the typed signature.
+if TYPE_CHECKING:
+    from dobot_api_v3 import FeedbackData as V3FeedbackData
+    from dobot_api_v4 import FeedbackData as V4FeedbackData
+
+FeedbackData: TypeAlias = "V3FeedbackData | V4FeedbackData"
 
 
 # ---------------------------------------------------------------------------

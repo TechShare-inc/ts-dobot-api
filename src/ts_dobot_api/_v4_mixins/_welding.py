@@ -1,26 +1,22 @@
-"""Welding extension — V4-only (CR / Nova 2s / Nova NG)."""
+"""V4 welding mixin — arc tracking, weaving, and weld-speed control."""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any
+from typing import TYPE_CHECKING
 
-from .base import ExtensionNamespace
+if TYPE_CHECKING:
+    from dobot_api_v4 import DobotRobot as V4Robot
 
 
-class Welding(ExtensionNamespace):
-    """Arc-tracking and weaving control for welding applications.
+class V4WeldingMixin:
+    """Welding methods available only on V4 robots."""
 
-    Available only on V4 robots.  Access via ``robot.weld``.
-    """
-
-    _feature_name = "Welding"
-
-    # -- Arc tracking --------------------------------------------------
+    _native: V4Robot
 
     def arc_track_start(self) -> None:
         """Start arc tracking."""
-        self._require_v4().arc_track_start()
+        self._native.dashboard.arc_track_start()
 
     def arc_track_params(
         self,
@@ -34,7 +30,7 @@ class Welding(ExtensionNamespace):
         left_right_compensation_offset: float,
     ) -> None:
         """Configure arc-tracking parameters."""
-        self._require_v4().arc_track_params(
+        self._native.dashboard.arc_track_params(
             sample_time,
             coordinate_type,
             up_down_compensation_min,
@@ -47,7 +43,7 @@ class Welding(ExtensionNamespace):
 
     def arc_track_end(self) -> None:
         """End arc tracking."""
-        self._require_v4().arc_track_end()
+        self._native.dashboard.arc_track_end()
 
     def set_arc_track_offset(
         self,
@@ -59,7 +55,7 @@ class Welding(ExtensionNamespace):
         offset_rz: float,
     ) -> None:
         """Set arc-tracking offset."""
-        self._require_v4().set_arc_track_offset(
+        self._native.dashboard.set_arc_track_offset(
             offset_x,
             offset_y,
             offset_z,
@@ -67,8 +63,6 @@ class Welding(ExtensionNamespace):
             offset_ry,
             offset_rz,
         )
-
-    # -- Weld relative-point -------------------------------------------
 
     def rel_point_weld_line(
         self,
@@ -81,12 +75,8 @@ class Welding(ExtensionNamespace):
         p1: Sequence[float],
         p2: Sequence[float],
     ) -> int:
-        """Linear weld relative to reference points.
-
-        Returns:
-            Command queue ID.
-        """
-        return self._require_v4().rel_point_weld_line(
+        """Linear weld relative to reference points."""
+        return self._native.dashboard.rel_point_weld_line(
             start_x,
             end_x,
             y,
@@ -109,12 +99,8 @@ class Welding(ExtensionNamespace):
         p2: Sequence[float],
         p3: Sequence[float],
     ) -> int:
-        """Arc weld relative to reference points.
-
-        Returns:
-            Command queue ID.
-        """
-        return self._require_v4().rel_point_weld_arc(
+        """Arc weld relative to reference points."""
+        return self._native.dashboard.rel_point_weld_arc(
             start_x,
             end_x,
             y,
@@ -126,11 +112,9 @@ class Welding(ExtensionNamespace):
             p3,
         )
 
-    # -- Weaving -------------------------------------------------------
-
     def weave_start(self) -> None:
         """Start weaving pattern."""
-        self._require_v4().weave_start()
+        self._native.dashboard.weave_start()
 
     def weave_params(
         self,
@@ -146,10 +130,10 @@ class Welding(ExtensionNamespace):
         stop_time4: int,
         radius: float,
         radian: float,
-        **kwargs: Any,
+        **kwargs: int | float,
     ) -> None:
         """Configure weaving parameters."""
-        self._require_v4().weave_params(
+        self._native.dashboard.weave_params(
             weld_type,
             frequency,
             left_amplitude,
@@ -167,18 +151,16 @@ class Welding(ExtensionNamespace):
 
     def weave_end(self) -> None:
         """End weaving pattern."""
-        self._require_v4().weave_end()
-
-    # -- Weld arc speed ------------------------------------------------
+        self._native.dashboard.weave_end()
 
     def weld_arc_speed_start(self) -> None:
         """Start weld arc speed section."""
-        self._require_v4().weld_arc_speed_start()
+        self._native.dashboard.weld_arc_speed_start()
 
     def weld_arc_speed(self, speed: float) -> None:
         """Set weld arc speed."""
-        self._require_v4().weld_arc_speed(speed)
+        self._native.dashboard.weld_arc_speed(speed)
 
     def weld_arc_speed_end(self) -> None:
         """End weld arc speed section."""
-        self._require_v4().weld_arc_speed_end()
+        self._native.dashboard.weld_arc_speed_end()

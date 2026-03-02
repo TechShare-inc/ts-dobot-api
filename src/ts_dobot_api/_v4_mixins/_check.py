@@ -1,17 +1,17 @@
-"""Motion-check extension — V4-only (CR / Nova 2s / Nova NG)."""
+"""V4 motion-check mixin — reachability / collision pre-checks."""
 
 from __future__ import annotations
 
-from .base import ExtensionNamespace
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dobot_api_v4 import DobotRobot as V4Robot
 
 
-class MotionCheck(ExtensionNamespace):
-    """Pre-flight motion validation (collision / reachability checks).
+class V4CheckMixin:
+    """Motion-check methods available only on V4 robots."""
 
-    Available only on V4 robots.  Access via ``robot.check``.
-    """
-
-    _feature_name = "Motion check"
+    _native: V4Robot
 
     def check_mov_j(
         self,
@@ -35,7 +35,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Check a joint move for reachability / collision."""
-        self._require_v4().check_mov_j(
+        self._native.dashboard.check_mov_j(
             j1a,
             j2a,
             j3a,
@@ -77,7 +77,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Check a linear move for reachability / collision."""
-        self._require_v4().check_mov_l(
+        self._native.dashboard.check_mov_l(
             j1a,
             j2a,
             j3a,
@@ -125,7 +125,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Check a circular move for reachability / collision."""
-        self._require_v4().check_mov_c(
+        self._native.dashboard.check_mov_c(
             j1a,
             j2a,
             j3a,
@@ -173,7 +173,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Odd-segment check for joint move."""
-        self._require_v4().check_odd_mov_j(
+        self._native.dashboard.check_odd_mov_j(
             j1a,
             j2a,
             j3a,
@@ -215,7 +215,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Odd-segment check for linear move."""
-        self._require_v4().check_odd_mov_l(
+        self._native.dashboard.check_odd_mov_l(
             j1a,
             j2a,
             j3a,
@@ -263,7 +263,7 @@ class MotionCheck(ExtensionNamespace):
         cp: int = -1,
     ) -> None:
         """Odd-segment check for circular move."""
-        self._require_v4().check_odd_mov_c(
+        self._native.dashboard.check_odd_mov_c(
             j1a,
             j2a,
             j3a,
