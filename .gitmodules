@@ -1,0 +1,8 @@
+[submodule "vendor/TCP-IP-Python-V4"]
+	path = vendor/TCP-IP-Python-V4
+	url = https://github.com/TechShare-inc/TCP-IP-Python-V4.git
+	branch = ts-main
+[submodule "vendor/TCP-IP-Python-V3"]
+	path = vendor/TCP-IP-Python-V3
+	url = https://github.com/TechShare-inc/TCP-IP-Python-V3.git
+	branch = ts-main
