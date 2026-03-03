@@ -15,7 +15,7 @@ from ts_dobot_api.exceptions import StartupError, TsDobotError
 
 # -- Configuration --------------------------------------------------------
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "CR"
+ROBOT_MODEL = "NOVA"
 
 
 def main() -> None:

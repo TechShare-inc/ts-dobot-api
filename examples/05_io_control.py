@@ -18,7 +18,7 @@ from ts_dobot_api import DobotRobot
 
 # -- Configuration --------------------------------------------------------
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "CR"
+ROBOT_MODEL = "NOVA"
 
 # Digital output indices (check your wiring diagram).
 DO_INDEX = 1

@@ -15,7 +15,7 @@ from ts_dobot_api import DobotRobot
 
 # -- Configuration --------------------------------------------------------
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "CR"
+ROBOT_MODEL = "NOVA"
 
 # How many samples to read.
 SAMPLE_COUNT = 5
