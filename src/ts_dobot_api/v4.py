@@ -155,6 +155,22 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
         """Set the global speed factor (1–100)."""
         self._native.speed_factor(speed)
 
+    def run_script(self, project_name: str) -> None:
+        """Run a project/script on the controller."""
+        self._native.dashboard.run_script(project_name)
+
+    def stop_script(self) -> None:
+        """Stop the running script or motion queue."""
+        self._native.dashboard.stop_script()
+
+    def pause_script(self) -> None:
+        """Pause the running script or motion queue."""
+        self._native.dashboard.pause_script()
+
+    def resume_script(self) -> None:
+        """Resume a paused script or motion queue."""
+        self._native.dashboard.resume()
+
     # ==================================================================
     # Motion
     # ==================================================================
@@ -338,6 +354,67 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
             if cmd_id == 0:
                 break
             time.sleep(0.1)
+
+    def circle(
+        self,
+        x1: float,
+        y1: float,
+        z1: float,
+        rx1: float,
+        ry1: float,
+        rz1: float,
+        x2: float,
+        y2: float,
+        z2: float,
+        rx2: float,
+        ry2: float,
+        rz2: float,
+        *,
+        count: int = 1,
+        speed: int | None = None,
+        accel: int | None = None,
+        cp: int | None = None,
+        user: int | None = None,
+        tool: int | None = None,
+    ) -> int:
+        """Full-circle interpolated motion through two via-points."""
+        return self._native.circle(
+            x1,
+            y1,
+            z1,
+            rx1,
+            ry1,
+            rz1,
+            x2,
+            y2,
+            z2,
+            rx2,
+            ry2,
+            rz2,
+            coordinate_mode=0,
+            count=count,
+            user=_opt(user),
+            tool=_opt(tool),
+            a=_opt(accel),
+            v=_opt(speed),
+            cp=_opt(cp),
+        )
+
+    def start_path(
+        self,
+        trace_name: str,
+        *,
+        is_const: int = -1,
+        multi: float = -1.0,
+    ) -> int:
+        """Play back a recorded trajectory file."""
+        return self._native.dashboard.start_path(
+            trace_name, is_const=is_const, multi=multi
+        )
+
+    def get_start_pose(self, trace_name: str) -> Pose:
+        """Return the starting pose of a recorded trajectory."""
+        return _pose_from_v4(self._native.dashboard.get_start_pose(trace_name))
 
     # ==================================================================
     # Relative motion
@@ -551,6 +628,44 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
         """Exit drag/teach mode."""
         self._native.stop_drag()
 
+    def get_current_command_id(self) -> int:
+        """Return the queue ID of the currently executing command."""
+        return self._native.get_current_command_id()
+
+    def positive_kin(
+        self,
+        j1: float,
+        j2: float,
+        j3: float,
+        j4: float,
+        j5: float,
+        j6: float,
+        *,
+        user: int = -1,
+        tool: int = -1,
+    ) -> Pose:
+        """Forward kinematics — joint angles to Cartesian pose."""
+        return _pose_from_v4(
+            self._native.positive_kin(j1, j2, j3, j4, j5, j6, user=user, tool=tool)
+        )
+
+    def inverse_kin(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        rx: float,
+        ry: float,
+        rz: float,
+        *,
+        user: int = -1,
+        tool: int = -1,
+    ) -> Pose:
+        """Inverse kinematics — Cartesian pose to joint angles."""
+        return _pose_from_v4(
+            self._native.inverse_kin(x, y, z, rx, ry, rz, user=user, tool=tool)
+        )
+
     # ==================================================================
     # I/O
     # ==================================================================
@@ -574,6 +689,38 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
     def tool_di(self, index: int) -> int:
         """Read a tool digital input."""
         return self._native.dashboard.tool_di(index)
+
+    def do_instant(self, index: int, status: int) -> None:
+        """Set a digital output immediately (bypasses the motion queue)."""
+        self._native.dashboard.do_instant(index, status)
+
+    def tool_do_instant(self, index: int, status: int) -> None:
+        """Set a tool digital output immediately."""
+        self._native.dashboard.tool_do_instant(index, status)
+
+    def ao_instant(self, index: int, value: float) -> None:
+        """Set an analogue output immediately."""
+        self._native.dashboard.ao_instant(index, value)
+
+    def ai(self, index: int) -> int:
+        """Read an analogue input."""
+        return self._native.dashboard.ai(index)
+
+    def tool_ai(self, index: int) -> int:
+        """Read a tool analogue input."""
+        return self._native.dashboard.tool_ai(index)
+
+    def get_do(self, index: int) -> int:
+        """Read the current status of a digital output."""
+        return self._native.get_do(index)
+
+    def get_tool_do(self, index: int) -> int:
+        """Read the current status of a tool digital output."""
+        return self._native.dashboard.get_tool_do(index)
+
+    def get_ao(self, index: int) -> float:
+        """Read the current value of an analogue output."""
+        return float(self._native.dashboard.get_ao(index))
 
     # ==================================================================
     # Feedback
@@ -609,6 +756,26 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
     def clear_and_recover(self, language: str = "en") -> bool:
         """Attempt to clear errors. Returns ``True`` on success."""
         return self._native.clear_robot_error(language=language)
+
+    # ==================================================================
+    # Force control
+    # ==================================================================
+
+    def enable_ft_sensor(self, status: int) -> None:
+        """Enable or disable the force/torque sensor."""
+        self._native.dashboard.enable_ft_sensor(status)
+
+    def six_force_home(self) -> None:
+        """Zero (home) the six-axis force/torque sensor."""
+        self._native.dashboard.six_force_home()
+
+    def get_force(self) -> Pose:
+        """Return force/torque readings from the sensor."""
+        return _pose_from_v4(self._native.get_force())
+
+    def fc_off(self) -> None:
+        """Turn off force-compliance mode."""
+        self._native.fc_off()
 
     # ==================================================================
     # Raw
