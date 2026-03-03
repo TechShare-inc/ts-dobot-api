@@ -14,7 +14,7 @@ class NotSupportedError(TsDobotError):
     """
 
 
-class ConnectionError(TsDobotError):  # noqa: A001
+class ConnectionError(TsDobotError):
     """Raised when the wrapper cannot establish or maintain a connection."""
 
 

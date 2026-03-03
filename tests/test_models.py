@@ -11,18 +11,14 @@ class TestRobotFamily:
     @pytest.mark.parametrize(
         "model, expected_family, expected_version",
         [
-            ("CR3", RobotFamily.CR, ApiVersion.V4),
-            ("CR5", RobotFamily.CR, ApiVersion.V4),
-            ("CR10", RobotFamily.CR, ApiVersion.V4),
-            ("CR16", RobotFamily.CR, ApiVersion.V4),
-            ("cr5", RobotFamily.CR, ApiVersion.V4),
-            ("Nova", RobotFamily.NOVA, ApiVersion.V3),
+            ("CR", RobotFamily.CR, ApiVersion.V4),
+            ("cr", RobotFamily.CR, ApiVersion.V4),
             ("NOVA", RobotFamily.NOVA, ApiVersion.V3),
-            ("Nova2s", RobotFamily.NOVA_2S, ApiVersion.V4),
-            ("nova 2s", RobotFamily.NOVA_2S, ApiVersion.V4),
-            ("Nova NG", RobotFamily.NOVA_NG, ApiVersion.V4),
-            ("NovaNG", RobotFamily.NOVA_NG, ApiVersion.V4),
-            ("novang5", RobotFamily.NOVA_NG, ApiVersion.V4),
+            ("nova", RobotFamily.NOVA, ApiVersion.V3),
+            ("NOVA_2S", RobotFamily.NOVA_2S, ApiVersion.V4),
+            ("nova_2s", RobotFamily.NOVA_2S, ApiVersion.V4),
+            ("NOVA_NG", RobotFamily.NOVA_NG, ApiVersion.V4),
+            ("nova_ng", RobotFamily.NOVA_NG, ApiVersion.V4),
         ],
     )
     def test_from_model(
@@ -36,6 +32,12 @@ class TestRobotFamily:
         with pytest.raises(ValueError, match="Unknown robot model"):
             RobotFamily.from_model("UnknownBot9000")
 
+    def test_old_aliases_no_longer_work(self) -> None:
+        """Free-form aliases (e.g. 'Nova 2s', 'novang') are no longer accepted."""
+        for alias in ["Nova 2s", "novang", "Nova NG", "CR5"]:
+            with pytest.raises(ValueError, match="Unknown robot model"):
+                RobotFamily.from_model(alias)
+
     def test_resolve_api_version_shortcut(self) -> None:
-        assert resolve_api_version("CR5") is ApiVersion.V4
+        assert resolve_api_version("CR") is ApiVersion.V4
         assert resolve_api_version("Nova") is ApiVersion.V3

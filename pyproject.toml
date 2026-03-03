@@ -23,6 +23,8 @@ dependencies = [
     "loguru>=0.7.0",
     "python-i18n>=0.3.9",
     "pyyaml>=6.0",
+    "dobot-api-v3 @ file:///${PROJECT_ROOT}/vendor/TCP-IP-Python-V3",
+    "dobot-api-v4 @ file:///${PROJECT_ROOT}/vendor/TCP-IP-Python-V4",
 ]
 
 [project.optional-dependencies]

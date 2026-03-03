@@ -11,26 +11,25 @@ Example::
         robot.sync()
         robot.shutdown()
 
-    # V4-only methods (force, welding, conveyor, motion-check)
-    from ts_dobot_api import DobotRobotV4
-
+    # V4-only methods — access via the ``.native`` escape hatch:
     with DobotRobot.connect("192.168.1.6", model="CR5") as robot:
-        assert isinstance(robot, DobotRobotV4)
         robot.startup()
-        robot.enable_ft_sensor(1)
-        force = robot.get_force()
-        robot.fc_off()
+        robot.native.dashboard.enable_ft_sensor(1)
+        force = robot.native.dashboard.get_force()
+        robot.native.dashboard.fc_off()
         robot.shutdown()
 """
 
-from __future__ import annotations
+from typing import Generic, TypeVar
 
 from loguru import logger
 
 from .models import ApiVersion, RobotFamily
 
+_T_Native = TypeVar("_T_Native")
 
-class DobotRobot:
+
+class DobotRobot(Generic[_T_Native]):
     """Base class for all Dobot robots.
 
     Use the :meth:`connect` class-method to create an instance — it
@@ -44,7 +43,7 @@ class DobotRobot:
     """
 
     _api_version: ApiVersion  # set by subclass
-    _native: object  # set by subclass (V3Robot or V4Robot)
+    _native: _T_Native
 
     def __init__(self, ip: str, model: str, *, language: str = "en") -> None:
         self._ip = ip
@@ -53,7 +52,9 @@ class DobotRobot:
         self._family: RobotFamily = RobotFamily.from_model(model)
 
     @classmethod
-    def connect(cls, ip: str, model: str, *, language: str = "en") -> DobotRobot:
+    def connect(
+        cls, ip: str, model: str, *, language: str = "en"
+    ) -> "DobotRobot[object]":
         """Factory: create, connect, and return the correct subclass.
 
         Args:
@@ -67,20 +68,20 @@ class DobotRobot:
         family = RobotFamily.from_model(model)
         version = family.api_version
 
+        robot: DobotRobot[object]
         if version is ApiVersion.V3:
             from .v3 import DobotRobotV3
 
-            robot: DobotRobot = DobotRobotV3(ip, model, language=language)
+            robot = DobotRobotV3(ip, model, language=language)  # type: ignore[assignment]
         elif version is ApiVersion.V4:
             from .v4 import DobotRobotV4
 
-            robot = DobotRobotV4(ip, model, language=language)
+            robot = DobotRobotV4(ip, model, language=language)  # type: ignore[assignment]
         else:
             raise ValueError(f"Unsupported API version: {version!r}")
 
         logger.info(
-            f"DobotRobot connected: model={model!r}, family={family.display_name}, "
-            f"api={version.value}, ip={ip}"
+            f"DobotRobot connected: model={model!r}, family={family.display_name}, api={version.value}, ip={ip}"
         )
         return robot
 
@@ -109,7 +110,7 @@ class DobotRobot:
         return self._api_version
 
     @property
-    def native(self) -> object:
+    def native(self) -> _T_Native:
         """Access the underlying SDK's ``DobotRobot`` object directly.
 
         Useful when you need a method that isn't exposed by the wrapper.
@@ -117,10 +118,18 @@ class DobotRobot:
         return self._native
 
     # ------------------------------------------------------------------
+    # Lifecycle (implemented by subclasses)
+    # ------------------------------------------------------------------
+
+    def disconnect(self) -> None:
+        """Close all TCP connections (implemented by subclass)."""
+        raise NotImplementedError
+
+    # ------------------------------------------------------------------
     # Context manager
     # ------------------------------------------------------------------
 
-    def __enter__(self) -> DobotRobot:
+    def __enter__(self) -> "DobotRobot[_T_Native]":
         return self
 
     def __exit__(self, *exc_info: object) -> None:

@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from ._v4_mixins import V4CheckMixin, V4ConveyorMixin, V4ForceMixin, V4WeldingMixin
-from ._v4_mixins._helpers import _opt, _pose_from_v4
 from .models import ApiVersion
 from .robot import DobotRobot
 from .types import Pose
@@ -19,30 +17,46 @@ if TYPE_CHECKING:
     from dobot_api_v4 import DobotApiFeedback as V4Feedback
     from dobot_api_v4 import DobotRobot as V4Robot
     from dobot_api_v4 import FeedbackData as V4FeedbackData
+    from dobot_api_v4 import Pose as V4Pose
+
+
+def _opt(val: int | None) -> int:
+    # helper for converting None to -1 in options
+    return val if val is not None else -1
+
+
+def _pose_from_v4(v4_pose: V4Pose) -> Pose:
+    """Convert a V4 ``dobot_api_v4.Pose`` to our unified :class:`Pose`."""
+    return Pose(
+        x=v4_pose.x,
+        y=v4_pose.y,
+        z=v4_pose.z,
+        rx=v4_pose.rx,
+        ry=v4_pose.ry,
+        rz=v4_pose.rz,
+    )
+
 
 # -- DobotRobotV4 ---------------------------------------------------------
 
 
-class DobotRobotV4(
-    V4ForceMixin,
-    V4WeldingMixin,
-    V4ConveyorMixin,
-    V4CheckMixin,
-    DobotRobot,
-):
+class DobotRobotV4(DobotRobot["V4Robot"]):
     """Dobot robot using the V4 protocol (CR / Nova 2s / Nova NG series).
 
     Wraps ``dobot_api_v4.DobotRobot`` directly — no adapter layer.
-    Includes V4-only extension methods (force control, welding,
-    conveyor tracking, motion checks) via mixins.
+
+    For V4-specific commands not exposed by the unified wrapper
+    (e.g. force control, welding, conveyor tracking, motion checks),
+    use the :attr:`native` property to access the underlying SDK::
+
+        robot.native.dashboard.enable_ft_sensor(1)
+        robot.native.dashboard.check_mov_j(...)
     """
 
     _api_version = ApiVersion.V4
 
     def __init__(self, ip: str, model: str, *, language: str = "en") -> None:
         super().__init__(ip, model, language=language)
-
-        from dobot_api_v4 import DobotRobot as V4Robot
 
         self._native: V4Robot = V4Robot(ip, language=language)
 

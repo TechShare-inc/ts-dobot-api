@@ -60,7 +60,7 @@ def _build_dyn_params(
 # -- DobotRobotV3 ---------------------------------------------------------
 
 
-class DobotRobotV3(DobotRobot):
+class DobotRobotV3(DobotRobot["V3Robot"]):
     """Dobot robot using the V3 protocol (Nova series).
 
     Wraps ``dobot_api_v3.DobotRobot`` directly — no adapter layer.
