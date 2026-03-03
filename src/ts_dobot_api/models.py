@@ -1,4 +1,4 @@
-"""Robot model registry – maps model names to API versions."""
+"""Robot model registry - maps model names to API versions."""
 
 from __future__ import annotations
 

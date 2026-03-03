@@ -150,7 +150,7 @@ class DobotRobotV3(DobotRobot["V3Robot"]):
         self._native.emergency_stop()
 
     def speed_factor(self, speed: int) -> None:
-        """Set the global speed factor (1–100)."""
+        """Set the global speed factor (1-100)."""
         self._native.speed_factor(speed)
 
     # ==================================================================

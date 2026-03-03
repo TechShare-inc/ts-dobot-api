@@ -1,4 +1,4 @@
-"""Unified robot facade — the main user-facing entry point.
+"""Unified robot facade - the main user-facing entry point.
 
 Example::
 

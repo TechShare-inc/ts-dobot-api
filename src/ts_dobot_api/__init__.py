@@ -1,4 +1,4 @@
-"""TechShare Dobot API wrapper — unified interface for all Dobot robots."""
+"""TechShare Dobot API wrapper - unified interface for all Dobot robots."""
 
 __version__ = "1.0.0-alpha.1"
 
