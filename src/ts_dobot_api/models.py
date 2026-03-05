@@ -84,9 +84,7 @@ class RobotFamily(Enum):
             return cls(normalised)
         except ValueError:
             known = ", ".join(f'"{m.value}"' for m in cls)
-            raise ValueError(
-                f"Unknown robot model {model!r}. Expected one of: {known}"
-            ) from None
+            raise ValueError(f"Unknown robot model {model!r}. Expected one of: {known}") from None
 
 
 def resolve_api_version(model: str) -> ApiVersion:

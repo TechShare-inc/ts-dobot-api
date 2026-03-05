@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     import numpy as np
 
 
-
 class Feedback(RobotNamespace[object]):
     """Real-time feedback"""
 

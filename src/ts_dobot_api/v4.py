@@ -2,26 +2,27 @@
 
 from __future__ import annotations
 
-import time
 from typing import TYPE_CHECKING
 
 from .models import ApiVersion
 from .robot import DobotRobot
-from .types import Pose
-
-from .v4_namespaces import (
-    ConfigV4, ConveyorV4, ErrorHandlingV4, FeedbackV4, ForceControlV4,
-    IoV4, LifecycleV4, ModbusV4, MotionV4, QueryV4, RawV4, RelativeMotionV4,
-    SystemV4, WeldingV4
-)
+from .v4_namespaces.config import ConfigV4
+from .v4_namespaces.conveyor import ConveyorV4
+from .v4_namespaces.error_handling import ErrorHandlingV4
+from .v4_namespaces.feedback import FeedbackV4
+from .v4_namespaces.force_control import ForceControlV4
+from .v4_namespaces.io import IoV4
+from .v4_namespaces.lifecycle import LifecycleV4
+from .v4_namespaces.modbus import ModbusV4
+from .v4_namespaces.motion import MotionV4
+from .v4_namespaces.query import QueryV4
+from .v4_namespaces.raw import RawV4
+from .v4_namespaces.relative_motion import RelativeMotionV4
+from .v4_namespaces.system import SystemV4
+from .v4_namespaces.welding import WeldingV4
 
 if TYPE_CHECKING:
-    import numpy as np
-    from dobot_api_v4 import DobotApiDashboard as V4Dashboard
-    from dobot_api_v4 import DobotApiFeedback as V4Feedback
     from dobot_api_v4 import DobotRobot as V4Robot
-    from dobot_api_v4 import FeedbackData as V4FeedbackData
-    from dobot_api_v4 import Pose as V4Pose
 
 
 class DobotRobotV4(DobotRobot["V4Robot"]):
@@ -35,7 +36,7 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
         from dobot_api_v4 import DobotRobot as V4Robot
 
         self._native: V4Robot = V4Robot(ip, language=language)
-        
+
         # Initialize namespaces
         self.lifecycle = LifecycleV4(self._native)
         self.system = SystemV4(self._native)
