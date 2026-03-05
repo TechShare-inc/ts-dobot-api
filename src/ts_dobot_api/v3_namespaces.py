@@ -16,6 +16,7 @@ from .exceptions import NotSupportedError
 if TYPE_CHECKING:
     import numpy as np
     from .types import Pose
+    from dobot_api_v3 import DobotRobot as V3Robot
 
 
 # ============================================================================
@@ -139,6 +140,9 @@ class FeedbackV3(Feedback):
 
 class IoV3(Io):
     """Concrete Io implementation for V3 API."""
+
+    if TYPE_CHECKING:
+        native: V3Robot
 
     def ai(self, index: int) -> int:
         return self.native.ai(index)
