@@ -11,6 +11,8 @@ Difficulty: Beginner
 Prerequisites: 01_basic_connection.py completed successfully
 """
 
+import time
+
 from ts_dobot_api import DobotRobot
 
 # -- Configuration --------------------------------------------------------
@@ -28,6 +30,7 @@ def main() -> None:
         # 1. Startup — clears errors, enables the robot, sets speed.
         robot.startup(speed=30)
         print("Robot started.")
+        time.sleep(1)  # give the robot a moment to start up before sending commands
 
         # 2. Read current state so every target is relative to wherever
         #    the robot happens to be after startup.
@@ -42,12 +45,20 @@ def main() -> None:
         #     to the target; orientation is unchanged.
         robot.mov_j(x0 + _DX, y0, z0, rx0, ry0, rz0)
         robot.sync()
-        print("Joint move complete.")
+        print("Joint move: reached target.")
+
+        robot.mov_j(x0, y0, z0, rx0, ry0, rz0)
+        robot.sync()
+        print("Joint move: returned home.")
 
         # 3b. Linear move (MovL) — the TCP travels in a straight line.
         robot.mov_l(x0 + _DX, y0 + _DY, z0, rx0, ry0, rz0)
         robot.sync()
-        print("Linear move complete.")
+        print("Linear move: reached target.")
+
+        robot.mov_l(x0, y0, z0, rx0, ry0, rz0)
+        robot.sync()
+        print("Linear move: returned home.")
 
         # 3c. Circular move — one full circle defined by the current position
         #     plus two via-points.  The three points must not be collinear.
@@ -58,22 +69,22 @@ def main() -> None:
         #     via-point 2: three-quarter point
         #
         #     Note: ``circle()`` is V4-only; on V3 use ``arc()`` instead.
-        robot.circle(
-            x0,
-            y0 + _DY,
-            z0,
-            rx0,
-            ry0,
-            rz0,  # via-point 1
-            x0 + _DX,
-            y0,
-            z0,
-            rx0,
-            ry0,
-            rz0,  # via-point 2
-        )
-        robot.sync()
-        print("Circular move complete.")
+        # robot.circle(
+        #     x0,
+        #     y0 + _DY,
+        #     z0,
+        #     rx0,
+        #     ry0,
+        #     rz0,  # via-point 1
+        #     x0 + _DX,
+        #     y0,
+        #     z0,
+        #     rx0,
+        #     ry0,
+        #     rz0,  # via-point 2
+        # )
+        # robot.sync()
+        # print("Circular move complete (returns to start automatically).")
 
         # 4. Shutdown — disables the robot arm gracefully.
         robot.shutdown()
