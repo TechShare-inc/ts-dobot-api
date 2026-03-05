@@ -38,7 +38,7 @@ class DobotRobotV4(DobotRobot["V4Robot"]):
         self._native: V4Robot = V4Robot(ip, language=language)
 
         # Initialize namespaces
-        self.lifecycle = LifecycleV4(self._native)
+        self.lifecycle = LifecycleV4(self._native, language=language)
         self.system = SystemV4(self._native)
         self.motion = MotionV4(self._native)
         self.relative_motion = RelativeMotionV4(self._native)

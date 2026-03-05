@@ -46,9 +46,15 @@ class DobotRobotV3(DobotRobot["V3Robot"]):
         self.raw = RawV3(self._native)
 
         # V4 Only namespaces mapped to error on V3
-        from .v3_namespaces import ConveyorV3, ForceControlV3, ModbusV3, WeldingV3
-
-        self.modbus = ModbusV3(self._native)
-        self.welding = WeldingV3(self._native)
-        self.conveyor = ConveyorV3(self._native)
-        self.force_control = ForceControlV3(self._native)
+        self.modbus = lambda: (_ for _ in ()).throw(
+            NotImplementedError("Modbus namespace is not available in V3 API")
+            )
+        self.welding = lambda: (_ for _ in ()).throw(
+            NotImplementedError("Welding namespace is not available in V3 API")
+        )
+        self.conveyor = lambda: (_ for _ in ()).throw(
+            NotImplementedError("Conveyor namespace is not available in V3 API")
+        )
+        self.force_control = lambda: (_ for _ in ()).throw(
+            NotImplementedError("ForceControl namespace is not available in V3 API")
+        )
