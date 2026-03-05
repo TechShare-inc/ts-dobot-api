@@ -28,14 +28,14 @@ def main() -> None:
     """Run startup, read state, execute basic moves, then shut down."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
         # 1. Startup — clears errors, enables the robot, sets speed.
-        robot.startup(speed=30)
+        robot.lifecycle.startup(speed=30)
         print("Robot started.")
         time.sleep(1)  # give the robot a moment to start up before sending commands
 
         # 2. Read current state so every target is relative to wherever
         #    the robot happens to be after startup.
-        joints = robot.get_angle()  # j1-j6 in degrees (returned as Pose)
-        pose = robot.get_pose()  # Cartesian: x, y, z, rx, ry, rz (mm / °)
+        joints = robot.query.get_angle()  # j1-j6 in degrees (returned as Pose)
+        pose = robot.query.get_pose()  # Cartesian: x, y, z, rx, ry, rz (mm / °)
         print(f"Joint angles : {joints}")
         print(f"Cartesian    : {pose}")
 
@@ -43,21 +43,21 @@ def main() -> None:
 
         # 3a. Joint move (MovJ) — the robot plans a joint-space path
         #     to the target; orientation is unchanged.
-        robot.mov_j(x0 + _DX, y0, z0, rx0, ry0, rz0)
-        robot.sync()
+        robot.motion.mov_j(x0 + _DX, y0, z0, rx0, ry0, rz0)
+        robot.motion.sync()
         print("Joint move: reached target.")
 
-        robot.mov_j(x0, y0, z0, rx0, ry0, rz0)
-        robot.sync()
+        robot.motion.mov_j(x0, y0, z0, rx0, ry0, rz0)
+        robot.motion.sync()
         print("Joint move: returned home.")
 
         # 3b. Linear move (MovL) — the TCP travels in a straight line.
-        robot.mov_l(x0 + _DX, y0 + _DY, z0, rx0, ry0, rz0)
-        robot.sync()
+        robot.motion.mov_l(x0 + _DX, y0 + _DY, z0, rx0, ry0, rz0)
+        robot.motion.sync()
         print("Linear move: reached target.")
 
-        robot.mov_l(x0, y0, z0, rx0, ry0, rz0)
-        robot.sync()
+        robot.motion.mov_l(x0, y0, z0, rx0, ry0, rz0)
+        robot.motion.sync()
         print("Linear move: returned home.")
 
         # 3c. Circular move — one full circle defined by the current position
@@ -69,7 +69,7 @@ def main() -> None:
         #     via-point 2: three-quarter point
         #
         #     Note: ``circle()`` is V4-only; on V3 use ``arc()`` instead.
-        # robot.circle(
+        # robot.motion.circle(
         #     x0,
         #     y0 + _DY,
         #     z0,
@@ -83,11 +83,11 @@ def main() -> None:
         #     ry0,
         #     rz0,  # via-point 2
         # )
-        # robot.sync()
+        # robot.motion.sync()
         # print("Circular move complete (returns to start automatically).")
 
         # 4. Shutdown — disables the robot arm gracefully.
-        robot.shutdown()
+        robot.lifecycle.shutdown()
         print("Robot shut down.")
 
 

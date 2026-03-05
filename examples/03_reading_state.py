@@ -22,10 +22,10 @@ ROBOT_MODEL = "NOVA"
 def main() -> None:
     """Query and display the robot's current state."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
-        robot.startup(speed=30)
+        robot.lifecycle.startup(speed=30)
 
         # Current Cartesian pose (x, y, z, rx, ry, rz).
-        pose = robot.get_pose()
+        pose = robot.query.get_pose()
         print(f"Cartesian pose: x={pose.x:.2f}, y={pose.y:.2f}, z={pose.z:.2f}")
         print(f"                rx={pose.rx:.2f}, ry={pose.ry:.2f}, rz={pose.rz:.2f}")
 
@@ -34,11 +34,11 @@ def main() -> None:
         print(f"As tuple: {coords}")
 
         # Current joint angles (j1-j6 mapped into the same Pose fields).
-        angles = robot.get_angle()
+        angles = robot.query.get_angle()
         print(f"Joint angles: {angles.as_tuple()}")
 
         # Robot operating mode (integer code).
-        mode = robot.robot_mode()
+        mode = robot.query.robot_mode()
         print(f"Robot mode: {mode}")
 
         # --- V4-only: kinematics -----------------------------------------
@@ -73,7 +73,7 @@ def main() -> None:
         except NotImplementedError:
             print("Kinematics queries not available on this robot (V3).")
 
-        robot.shutdown()
+        robot.lifecycle.shutdown()
 
 
 if __name__ == "__main__":

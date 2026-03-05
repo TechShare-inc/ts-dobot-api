@@ -23,22 +23,22 @@ def main() -> None:
     try:
         with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
             # --- Check for active alarms ---------------------------------
-            has_errors = robot.check_errors()
+            has_errors = robot.error_handling.check_errors()
             print(f"Has active alarms: {has_errors}")
 
             if has_errors:
-                error_ids = robot.get_error_id()
+                error_ids = robot.query.get_error_id()
                 print(f"Active error IDs: {error_ids}")
 
                 # Attempt to clear and recover automatically.
-                recovered = robot.clear_and_recover()
+                recovered = robot.error_handling.clear_and_recover()
                 print(f"Recovery result: {'success' if recovered else 'failed'}")
 
             # --- Normal operation ----------------------------------------
-            robot.startup(speed=20)
-            pose = robot.get_pose()
+            robot.lifecycle.startup(speed=20)
+            pose = robot.query.get_pose()
             print(f"Current pose: {pose.as_tuple()}")
-            robot.shutdown()
+            robot.lifecycle.shutdown()
 
     except StartupError as exc:
         # Raised when the startup sequence itself fails.

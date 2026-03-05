@@ -25,7 +25,7 @@ SAMPLE_INTERVAL = 0.5  # seconds
 def main() -> None:
     """Read and display real-time feedback samples."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
-        robot.startup(speed=20)
+        robot.lifecycle.startup(speed=20)
 
         print(
             f"Reading {SAMPLE_COUNT} feedback samples (interval={SAMPLE_INTERVAL}s):\n"
@@ -33,7 +33,7 @@ def main() -> None:
 
         try:
             for i in range(SAMPLE_COUNT):
-                data = robot.feedback_data()
+                data = robot.feedback.feedback_data()
                 if data is None:
                     print(f"  [{i + 1}] No feedback data received.")
                     continue
@@ -44,7 +44,7 @@ def main() -> None:
         except KeyboardInterrupt:
             print("\nSampling interrupted by user.")
 
-        robot.shutdown()
+        robot.lifecycle.shutdown()
 
 
 if __name__ == "__main__":

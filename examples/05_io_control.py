@@ -31,39 +31,39 @@ AO_INDEX = 1
 def main() -> None:
     """Read and write digital/analogue I/O."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
-        robot.startup(speed=20)
+        robot.lifecycle.startup(speed=20)
 
         # --- Digital outputs (queued) ------------------------------------
         # These commands are inserted into the motion queue and execute
         # in order with any pending move commands.
-        robot.do_output(DO_INDEX, status=1)
+        robot.io.do_output(DO_INDEX, status=1)
         print(f"DO{DO_INDEX} set to ON")
         time.sleep(0.5)
 
-        robot.do_output(DO_INDEX, status=0)
+        robot.io.do_output(DO_INDEX, status=0)
         print(f"DO{DO_INDEX} set to OFF")
 
         # Tool digital output.
-        robot.tool_do(TOOL_DO_INDEX, status=1)
+        robot.io.tool_do(TOOL_DO_INDEX, status=1)
         print(f"Tool DO{TOOL_DO_INDEX} set to ON")
         time.sleep(0.5)
 
-        robot.tool_do(TOOL_DO_INDEX, status=0)
+        robot.io.tool_do(TOOL_DO_INDEX, status=0)
         print(f"Tool DO{TOOL_DO_INDEX} set to OFF")
 
         # --- Digital inputs ----------------------------------------------
-        di_value = robot.di(DO_INDEX)
+        di_value = robot.io.di(DO_INDEX)
         print(f"DI{DO_INDEX} = {di_value}")
 
         tool_di_value = robot.tool_di(TOOL_DO_INDEX)
         print(f"Tool DI{TOOL_DO_INDEX} = {tool_di_value}")
 
         # --- Analogue output ---------------------------------------------
-        robot.ao(AO_INDEX, value=2.5)
+        robot.io.ao(AO_INDEX, value=2.5)
         print(f"AO{AO_INDEX} set to 2.5 V")
         time.sleep(0.5)
 
-        robot.ao(AO_INDEX, value=0.0)
+        robot.io.ao(AO_INDEX, value=0.0)
         print(f"AO{AO_INDEX} set to 0.0 V")
 
         # --- V4-only: immediate I/O (not queued) -------------------------
@@ -100,7 +100,7 @@ def main() -> None:
             ao_value = robot.get_ao(AO_INDEX)
             print(f"Current AO{AO_INDEX} value: {ao_value:.3f} V")
 
-            ai_value = robot.ai(AO_INDEX)
+            ai_value = robot.io.ai(AO_INDEX)
             print(f"AI{AO_INDEX} = {ai_value}")
 
             tool_ai_value = robot.tool_ai(1)
@@ -108,7 +108,7 @@ def main() -> None:
         except NotImplementedError:
             print("Output/input reads not available on this robot (V3).")
 
-        robot.shutdown()
+        robot.lifecycle.shutdown()
 
 
 if __name__ == "__main__":
