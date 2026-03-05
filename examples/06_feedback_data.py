@@ -27,9 +27,7 @@ def main() -> None:
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
         robot.lifecycle.startup(speed=20)
 
-        print(
-            f"Reading {SAMPLE_COUNT} feedback samples (interval={SAMPLE_INTERVAL}s):\n"
-        )
+        print(f"Reading {SAMPLE_COUNT} feedback samples (interval={SAMPLE_INTERVAL}s):\n")
 
         try:
             for i in range(SAMPLE_COUNT):

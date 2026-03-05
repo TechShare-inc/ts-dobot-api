@@ -46,7 +46,7 @@ def main() -> None:
         # joint angles without actually moving the robot.
         # Raises NotImplementedError on V3.
         try:
-            fk = robot.positive_kin(
+            fk = robot.query.positive_kin(
                 angles.x,
                 angles.y,
                 angles.z,
@@ -57,7 +57,7 @@ def main() -> None:
             print(f"FK (positive_kin): x={fk.x:.2f}, y={fk.y:.2f}, z={fk.z:.2f}")
 
             # inverse_kin: compute joint angles for a given Cartesian pose.
-            ik = robot.inverse_kin(
+            ik = robot.query.inverse_kin(
                 pose.x,
                 pose.y,
                 pose.z,
@@ -68,7 +68,7 @@ def main() -> None:
             print(f"IK (inverse_kin): j1={ik.x:.2f}, j2={ik.y:.2f}, j3={ik.z:.2f}")
 
             # get_current_command_id: poll the motion-queue position.
-            cmd_id = robot.get_current_command_id()
+            cmd_id = robot.query.get_current_command_id()
             print(f"Current command ID: {cmd_id}")
         except NotImplementedError:
             print("Kinematics queries not available on this robot (V3).")

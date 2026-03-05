@@ -31,27 +31,23 @@ def demo_v4_wrapper_methods(robot: DobotRobot) -> None:  # type: ignore[type-arg
     print("\n--- V4 unified wrapper methods ---")
 
     # Script/queue control.
-    # robot.run_script("my_project")   # run a project on the controller
-    # robot.pause_script()             # pause the motion queue
-    # robot.resume_script()            # resume it
-    # robot.stop_script()              # stop entirely
+    # robot.system.run_script("my_project")   # run a project on the controller
+    # robot.system.pause_script()             # pause the motion queue
+    # robot.system.resume_script()            # resume it
+    # robot.system.stop_script()              # stop entirely
 
     # Forward kinematics: joint angles -> Cartesian pose.
     angles = robot.query.get_angle()
-    fk_pose = robot.positive_kin(
-        angles.x, angles.y, angles.z, angles.rx, angles.ry, angles.rz
-    )
+    fk_pose = robot.query.positive_kin(angles.x, angles.y, angles.z, angles.rx, angles.ry, angles.rz)
     print(f"FK result: x={fk_pose.x:.2f}, y={fk_pose.y:.2f}, z={fk_pose.z:.2f}")
 
     # Inverse kinematics: Cartesian pose -> joint angles.
     pose = robot.query.get_pose()
-    ik_joints = robot.inverse_kin(pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz)
-    print(
-        f"IK result: j1={ik_joints.x:.2f}, j2={ik_joints.y:.2f}, j3={ik_joints.z:.2f}"
-    )
+    ik_joints = robot.query.inverse_kin(pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz)
+    print(f"IK result: j1={ik_joints.x:.2f}, j2={ik_joints.y:.2f}, j3={ik_joints.z:.2f}")
 
     # Poll the motion-queue command ID (useful for custom sync logic).
-    cmd_id = robot.get_current_command_id()
+    cmd_id = robot.query.get_current_command_id()
     print(f"Current command ID: {cmd_id}")
 
     # Full-circle move: supply two via-points; `count` = number of laps.
@@ -67,7 +63,7 @@ def demo_v4_wrapper_methods(robot: DobotRobot) -> None:  # type: ignore[type-arg
     # Force/torque sensor.
     print("\nForce sensor:")
     robot.force_control.enable_ft_sensor(1)  # enable sensor
-    robot.six_force_home()  # zero the sensor
+    robot.force_control.six_force_home()  # zero the sensor
     time.sleep(0.2)
     force = robot.force_control.get_force()  # Fx, Fy, Fz, Tx, Ty, Tz
     print(

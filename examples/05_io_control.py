@@ -55,7 +55,7 @@ def main() -> None:
         di_value = robot.io.di(DO_INDEX)
         print(f"DI{DO_INDEX} = {di_value}")
 
-        tool_di_value = robot.tool_di(TOOL_DO_INDEX)
+        tool_di_value = robot.io.tool_di(TOOL_DO_INDEX)
         print(f"Tool DI{TOOL_DO_INDEX} = {tool_di_value}")
 
         # --- Analogue output ---------------------------------------------
@@ -72,38 +72,38 @@ def main() -> None:
         # signals between motion commands.
         # Raises NotImplementedError on V3.
         try:
-            robot.do_instant(DO_INDEX, status=1)
+            robot.io.do_instant(DO_INDEX, status=1)
             print(f"DO{DO_INDEX} set immediately to ON (not queued)")
             time.sleep(0.2)
-            robot.do_instant(DO_INDEX, status=0)
+            robot.io.do_instant(DO_INDEX, status=0)
 
-            robot.tool_do_instant(TOOL_DO_INDEX, status=1)
+            robot.io.tool_do_instant(TOOL_DO_INDEX, status=1)
             print(f"Tool DO{TOOL_DO_INDEX} set immediately to ON")
             time.sleep(0.2)
-            robot.tool_do_instant(TOOL_DO_INDEX, status=0)
+            robot.io.tool_do_instant(TOOL_DO_INDEX, status=0)
 
-            robot.ao_instant(AO_INDEX, value=1.5)
+            robot.io.ao_instant(AO_INDEX, value=1.5)
             print(f"AO{AO_INDEX} set immediately to 1.5 V")
             time.sleep(0.2)
-            robot.ao_instant(AO_INDEX, value=0.0)
+            robot.io.ao_instant(AO_INDEX, value=0.0)
         except NotImplementedError:
             print("Instant I/O not available on this robot (V3).")
 
         # --- V4-only: read output and input state back -------------------
         try:
-            do_state = robot.get_do(DO_INDEX)
+            do_state = robot.io.get_do(DO_INDEX)
             print(f"Current DO{DO_INDEX} state: {do_state}")
 
-            tool_do_state = robot.get_tool_do(TOOL_DO_INDEX)
+            tool_do_state = robot.io.get_tool_do(TOOL_DO_INDEX)
             print(f"Current Tool DO{TOOL_DO_INDEX} state: {tool_do_state}")
 
-            ao_value = robot.get_ao(AO_INDEX)
+            ao_value = robot.io.get_ao(AO_INDEX)
             print(f"Current AO{AO_INDEX} value: {ao_value:.3f} V")
 
             ai_value = robot.io.ai(AO_INDEX)
             print(f"AI{AO_INDEX} = {ai_value}")
 
-            tool_ai_value = robot.tool_ai(1)
+            tool_ai_value = robot.io.tool_ai(1)
             print(f"Tool AI1 = {tool_ai_value}")
         except NotImplementedError:
             print("Output/input reads not available on this robot (V3).")
