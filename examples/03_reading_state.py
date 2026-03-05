@@ -22,7 +22,7 @@ ROBOT_MODEL = "NOVA"
 def main() -> None:
     """Query and display the robot's current state."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
-        robot.lifecycle.startup(speed=30)
+        robot.lifecycle.startup(speed=30, power_on_wait=20)
 
         # Current Cartesian pose (x, y, z, rx, ry, rz).
         pose = robot.query.get_pose()

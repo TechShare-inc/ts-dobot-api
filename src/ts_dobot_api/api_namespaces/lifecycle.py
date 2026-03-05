@@ -31,7 +31,7 @@ class Lifecycle(RobotNamespace[object]):
         center_y: float = 0.0,
         center_z: float = 0.0,
         *,
-        power_on_wait: float = 15.0,
+        power_on_wait: float = 20.0,
     ) -> None:
         """Run the standard startup sequence."""
         raise NotImplementedError

@@ -45,7 +45,7 @@ class LifecycleV4(Lifecycle):
         center_y: float = 0.0,
         center_z: float = 0.0,
         *,
-        power_on_wait: float = 15.0,
+        power_on_wait: float = 20.0,
     ) -> None:
         """V4 startup — composed manually since there's no built-in startup()."""
         logger.info("V4 startup sequence starting")

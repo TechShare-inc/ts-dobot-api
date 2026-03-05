@@ -168,6 +168,6 @@ class MotionV3(Motion):
     ) -> int:
         return self.native.start_path(trace_name, is_const, multi)
 
-    def sync(self) -> None:
+    def sync(self, timeout: float = 30.0) -> None:
         """Block until all queued motion commands have completed."""
         self.native.sync()

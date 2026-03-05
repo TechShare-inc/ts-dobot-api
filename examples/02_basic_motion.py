@@ -17,7 +17,7 @@ from ts_dobot_api import DobotRobot
 
 # -- Configuration --------------------------------------------------------
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "NOVA"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
+ROBOT_MODEL = "NOVA_NG"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
 
 # Path offsets (mm) applied to the start pose to build waypoints.
 _DX = 100.0  # step in X for the joint move

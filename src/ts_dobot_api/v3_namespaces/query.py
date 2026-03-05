@@ -46,7 +46,7 @@ class QueryV3(Query):
         user: int = -1,
         tool: int = -1,
     ) -> Pose:
-        return self.native.inverse_kin(x, y, z, rx, ry, rz, user, tool)
+        return self.native.inverse_solution(x, y, z, rx, ry, rz, user, tool)
 
     def positive_kin(
         self,
@@ -60,7 +60,7 @@ class QueryV3(Query):
         user: int = -1,
         tool: int = -1,
     ) -> Pose:
-        return self.native.positive_kin(j1, j2, j3, j4, j5, j6, user, tool)
+        return self.native.positive_solution(j1, j2, j3, j4, j5, j6, user, tool)
 
     def robot_mode(self) -> int:
         """Return the current robot mode."""

@@ -68,8 +68,8 @@ def main() -> None:
         # --- Payload -----------------------------------------------------
         # Always set the correct payload before moving.  Incorrect payload
         # causes inaccurate dynamics and may trigger collision alarms.
-        robot.config.set_payload(weight=0.0)
-        print("Payload set to 0.0 kg (no end-effector)")
+        # robot.config.set_payload(weight=0.0)
+        # print("Payload set to 0.0 kg (no end-effector)")
 
         # --- Collision detection level -----------------------------------
         # Level 0-5; higher = more sensitive.  Set to 0 to disable.

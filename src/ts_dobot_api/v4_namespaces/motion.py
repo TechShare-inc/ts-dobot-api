@@ -5,8 +5,6 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from loguru import logger
-
 from ..api_namespaces import Motion
 
 from ._utils import _opt, _pose_from_v4
@@ -246,14 +244,34 @@ class MotionV4(Motion):
         """Play back a recorded trajectory file."""
         return self.native.dashboard.start_path(trace_name, is_const=is_const, multi=multi)
 
-    def sync(self) -> None:
-        """Block until all queued motion commands have completed.
+    def sync(self, timeout: float = 30.0) -> None:
+        """Block until the robot finishes moving and returns to ENABLE state.
 
-        V4 has no native ``sync()`` — polls ``get_current_command_id()``.
+        V4 has no native ``sync()`` — polls ``robot_mode()`` every 50 ms.
+        Waits for the robot to enter RUNNING or SINGLE_MOVE mode, then waits
+        for it to drop back to ENABLE (idle).
+
+        Args:
+            timeout: Maximum seconds to wait before giving up.
+
+        Raises:
+            TimeoutError: If the motion does not complete within *timeout* seconds.
+            RuntimeError: If the robot enters ERROR state.
         """
-        logger.debug("V4 sync: polling get_current_command_id()")
-        while True:
-            cmd_id = self.native.get_current_command_id()
-            if cmd_id == 0:
-                break
-            time.sleep(0.1)
+        _MODE_ENABLE = 5
+        _MODE_RUNNING = 7
+        _MODE_SINGLE_MOVE = 8
+        _MODE_ERROR = 9
+
+        deadline = time.monotonic() + timeout
+        saw_moving = False
+        while time.monotonic() < deadline:
+            mode = self.native.robot_mode()
+            if mode in (_MODE_RUNNING, _MODE_SINGLE_MOVE):
+                saw_moving = True
+            elif saw_moving and mode == _MODE_ENABLE:
+                return
+            elif mode == _MODE_ERROR:
+                raise RuntimeError("Robot entered ERROR state during sync().")
+            time.sleep(0.05)
+        raise TimeoutError(f"sync() timed out after {timeout}s — motion did not complete.")

@@ -15,7 +15,7 @@ from ts_dobot_api import DobotRobot
 # -- Configuration --------------------------------------------------------
 # Change these values to match your setup.
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "NOVA"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
+ROBOT_MODEL = "NOVA_2S"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
 
 
 def main() -> None:

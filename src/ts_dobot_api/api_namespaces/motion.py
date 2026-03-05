@@ -123,7 +123,7 @@ class Motion(RobotNamespace[object]):
         """Circular arc move through two via-points."""
         raise NotImplementedError
 
-    def sync(self) -> None:
+    def sync(self, timeout: float = 30.0) -> None:
         """Block until all queued motion commands have completed."""
         raise NotImplementedError
 

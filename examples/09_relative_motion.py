@@ -20,7 +20,7 @@ from ts_dobot_api import DobotRobot
 
 # -- Configuration --------------------------------------------------------
 ROBOT_IP = "192.168.5.1"
-ROBOT_MODEL = "NOVA"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
+ROBOT_MODEL = "NOVA_NG"  # One of: "CR", "NOVA", "NOVA_2S", "NOVA_NG"
 
 # Small offsets (mm / °) to keep moves safe.
 OFFSET_Z = 30.0  # move 30 mm along Z
