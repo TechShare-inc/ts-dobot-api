@@ -74,8 +74,10 @@ python = "3.10.*"
 # entries, avoiding duplication. Vendor libraries are pinned to exact git commits.
 [tool.pixi.pypi-dependencies]
 ts-dobot-api = { path = ".", editable = true, extras = ["dev"] }
-dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", tag = "3.0.0-alpha.3" }
-dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", tag = "4.0.0-alpha.2" }
+# dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", tag = "3.0.0-alpha.3" }
+# dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", tag = "4.0.0-alpha.2" }
+dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", rev = "a60cc49" }
+dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", rev = "bd32fad" }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
