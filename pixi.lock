@@ -49,8 +49,8 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/5a/73/9a0b2974dd9a3d50788d235f10c4d73c2efcd22926036309645fc2f0db0c/python_i18n-0.3.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7a/1e/7acc4f0e74c4b3d9531e24739e0ab832a5edf40e64fbae1a9c01941cabd7/pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d3/01/a10fe54b653061585e655f5286c2662ebddb68831ed3eaebfb0eb08c0a16/ruff-0.15.5-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?rev=f433937f868422fa2b565dc9cc3fad0c3624e28e#f433937f868422fa2b565dc9cc3fad0c3624e28e
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?rev=75470fb3e33284cea48da6e5ac1ea3f3e1f83548#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?tag=3.0.0-alpha.3#f433937f868422fa2b565dc9cc3fad0c3624e28e
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?tag=4.0.0-alpha.2#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
       - pypi: https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl
       - pypi: ./
@@ -86,8 +86,8 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/5a/73/9a0b2974dd9a3d50788d235f10c4d73c2efcd22926036309645fc2f0db0c/python_i18n-0.3.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f4/a0/39350dd17dd6d6c6507025c0e53aef67a9293a6d37d3511f23ea510d5800/pyyaml-6.0.3-cp310-cp310-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/44/ed/e81dd668547da281e5dce710cf0bc60193f8d3d43833e8241d006720e42b/ruff-0.15.5-py3-none-macosx_10_12_x86_64.whl
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?rev=f433937f868422fa2b565dc9cc3fad0c3624e28e#f433937f868422fa2b565dc9cc3fad0c3624e28e
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?rev=75470fb3e33284cea48da6e5ac1ea3f3e1f83548#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?tag=3.0.0-alpha.3#f433937f868422fa2b565dc9cc3fad0c3624e28e
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?tag=4.0.0-alpha.2#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
       - pypi: https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl
       - pypi: ./
@@ -124,8 +124,8 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/5a/73/9a0b2974dd9a3d50788d235f10c4d73c2efcd22926036309645fc2f0db0c/python_i18n-0.3.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/05/14/52d505b5c59ce73244f59c7a50ecf47093ce4765f116cdb98286a71eeca2/pyyaml-6.0.3-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/c4/8f/533075f00aaf19b07c5cd6aa6e5d89424b06b3b3f4583bfa9c640a079059/ruff-0.15.5-py3-none-macosx_11_0_arm64.whl
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?rev=f433937f868422fa2b565dc9cc3fad0c3624e28e#f433937f868422fa2b565dc9cc3fad0c3624e28e
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?rev=75470fb3e33284cea48da6e5ac1ea3f3e1f83548#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?tag=3.0.0-alpha.3#f433937f868422fa2b565dc9cc3fad0c3624e28e
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?tag=4.0.0-alpha.2#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
       - pypi: https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl
       - pypi: ./
@@ -164,8 +164,8 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/5a/73/9a0b2974dd9a3d50788d235f10c4d73c2efcd22926036309645fc2f0db0c/python_i18n-0.3.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/fa/926c003379b19fca39dd4634818b00dec6c62d87faf628d1394e137354d4/pyyaml-6.0.3-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/b8/00/bf077a505b4e649bdd3c47ff8ec967735ce2544c8e4a43aba42ee9bf935d/ruff-0.15.5-py3-none-win_amd64.whl
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?rev=f433937f868422fa2b565dc9cc3fad0c3624e28e#f433937f868422fa2b565dc9cc3fad0c3624e28e
-      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?rev=75470fb3e33284cea48da6e5ac1ea3f3e1f83548#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?tag=3.0.0-alpha.3#f433937f868422fa2b565dc9cc3fad0c3624e28e
+      - pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?tag=4.0.0-alpha.2#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
       - pypi: https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e1/07/c6fe3ad3e685340704d314d765b7912993bcb8dc198f0e7a89382d37974b/win32_setctime-1.2.0-py3-none-any.whl
@@ -279,7 +279,7 @@ packages:
   requires_dist:
   - tomli ; python_full_version <= '3.11' and extra == 'toml'
   requires_python: '>=3.10'
-- pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?rev=f433937f868422fa2b565dc9cc3fad0c3624e28e#f433937f868422fa2b565dc9cc3fad0c3624e28e
+- pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V3?tag=3.0.0-alpha.3#f433937f868422fa2b565dc9cc3fad0c3624e28e
   name: dobot-api-v3
   version: 3.0.0a3
   requires_dist:
@@ -295,7 +295,7 @@ packages:
   - sphinx-autodoc2>=0.5.0 ; extra == 'docs'
   - sphinx-markdown-builder>=0.6.6 ; extra == 'docs'
   requires_python: '>=3.10'
-- pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?rev=75470fb3e33284cea48da6e5ac1ea3f3e1f83548#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
+- pypi: git+https://github.com/TechShare-inc/TCP-IP-Python-V4?tag=4.0.0-alpha.2#75470fb3e33284cea48da6e5ac1ea3f3e1f83548
   name: dobot-api-v4
   version: 4.0.0a2
   requires_dist:
@@ -1195,7 +1195,7 @@ packages:
 - pypi: ./
   name: ts-dobot-api
   version: 1.0.0a1
-  sha256: 5360575aef1eae4eadd782b964c82b22641ba6b83bfaa797ac224ad76a72fbf9
+  sha256: fb1536f80853375de4b4dca9a6c34f6520c77acc595e3f82acfbd0c851264608
   requires_dist:
   - numpy>=1.20.0
   - loguru>=0.7.0
