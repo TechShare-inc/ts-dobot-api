@@ -34,3 +34,5 @@ htmlcov/
 
 # ruff
 .ruff_cache/
+
+.pixi/

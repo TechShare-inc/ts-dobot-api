@@ -23,8 +23,6 @@ dependencies = [
     "loguru>=0.7.0",
     "python-i18n>=0.3.9",
     "pyyaml>=6.0",
-    "dobot-api-v3 @ file:///${PROJECT_ROOT}/vendor/TCP-IP-Python-V3",
-    "dobot-api-v4 @ file:///${PROJECT_ROOT}/vendor/TCP-IP-Python-V4",
 ]
 
 [project.optional-dependencies]
@@ -61,3 +59,28 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# ---------------------------------------------------------------------------
+# Pixi environment management
+# ---------------------------------------------------------------------------
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.dependencies]
+python = "3.10.*"
+
+# ts-dobot-api[dev] pulls in both the package and all [project.optional-dependencies.dev]
+# entries, avoiding duplication. Vendor libraries are pinned to exact git commits.
+[tool.pixi.pypi-dependencies]
+ts-dobot-api = { path = ".", editable = true, extras = ["dev"] }
+dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", rev = "f433937f868422fa2b565dc9cc3fad0c3624e28e" }
+dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", rev = "75470fb3e33284cea48da6e5ac1ea3f3e1f83548" }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+
+[tool.pixi.tasks]
+test = "pytest"
+lint = "ruff check src tests"
+typecheck = "mypy src"
