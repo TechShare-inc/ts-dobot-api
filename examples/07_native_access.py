@@ -31,51 +31,47 @@ def demo_v4_wrapper_methods(robot: DobotRobot) -> None:  # type: ignore[type-arg
     print("\n--- V4 unified wrapper methods ---")
 
     # Script/queue control.
-    # robot.run_script("my_project")   # run a project on the controller
-    # robot.pause_script()             # pause the motion queue
-    # robot.resume_script()            # resume it
-    # robot.stop_script()              # stop entirely
+    # robot.system.run_script("my_project")   # run a project on the controller
+    # robot.system.pause_script()             # pause the motion queue
+    # robot.system.resume_script()            # resume it
+    # robot.system.stop_script()              # stop entirely
 
     # Forward kinematics: joint angles -> Cartesian pose.
-    angles = robot.get_angle()
-    fk_pose = robot.positive_kin(
-        angles.x, angles.y, angles.z, angles.rx, angles.ry, angles.rz
-    )
+    angles = robot.query.get_angle()
+    fk_pose = robot.query.positive_kin(angles.x, angles.y, angles.z, angles.rx, angles.ry, angles.rz)
     print(f"FK result: x={fk_pose.x:.2f}, y={fk_pose.y:.2f}, z={fk_pose.z:.2f}")
 
     # Inverse kinematics: Cartesian pose -> joint angles.
-    pose = robot.get_pose()
-    ik_joints = robot.inverse_kin(pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz)
-    print(
-        f"IK result: j1={ik_joints.x:.2f}, j2={ik_joints.y:.2f}, j3={ik_joints.z:.2f}"
-    )
+    pose = robot.query.get_pose()
+    ik_joints = robot.query.inverse_kin(pose.x, pose.y, pose.z, pose.rx, pose.ry, pose.rz)
+    print(f"IK result: j1={ik_joints.x:.2f}, j2={ik_joints.y:.2f}, j3={ik_joints.z:.2f}")
 
     # Poll the motion-queue command ID (useful for custom sync logic).
-    cmd_id = robot.get_current_command_id()
+    cmd_id = robot.query.get_current_command_id()
     print(f"Current command ID: {cmd_id}")
 
     # Full-circle move: supply two via-points; `count` = number of laps.
-    # robot.circle(350, 0, 200, 0, 0, 0,  350, 50, 250, 0, 0, 0,  count=1)
-    # robot.sync()
+    # robot.motion.circle(350, 0, 200, 0, 0, 0,  350, 50, 250, 0, 0, 0,  count=1)
+    # robot.motion.sync()
 
     # Trajectory playback (file must exist on the controller).
     # start = robot.get_start_pose("my_trace")
     # print(f"Trajectory start pose: {start}")
     # robot.start_path("my_trace")
-    # robot.sync()
+    # robot.motion.sync()
 
     # Force/torque sensor.
     print("\nForce sensor:")
-    robot.enable_ft_sensor(1)  # enable sensor
-    robot.six_force_home()  # zero the sensor
+    robot.force_control.enable_ft_sensor(1)  # enable sensor
+    robot.force_control.six_force_home()  # zero the sensor
     time.sleep(0.2)
-    force = robot.get_force()  # Fx, Fy, Fz, Tx, Ty, Tz
+    force = robot.force_control.get_force()  # Fx, Fy, Fz, Tx, Ty, Tz
     print(
         f"  Fx={force.x:.2f} N  Fy={force.y:.2f} N  Fz={force.z:.2f} N"
         f"  Tx={force.rx:.2f} Nm  Ty={force.ry:.2f} Nm  Tz={force.rz:.2f} Nm"
     )
-    robot.fc_off()  # turn off force-compliance mode
-    robot.enable_ft_sensor(0)  # disable sensor
+    robot.force_control.fc_off()  # turn off force-compliance mode
+    robot.force_control.enable_ft_sensor(0)  # disable sensor
 
 
 def demo_native_advanced(robot: DobotRobot) -> None:  # type: ignore[type-arg]
@@ -85,7 +81,7 @@ def demo_native_advanced(robot: DobotRobot) -> None:  # type: ignore[type-arg]
     db = robot.native.dashboard  # type: ignore[union-attr]
 
     # Raw TCP command (lowest-level access).
-    raw = robot.send_raw("GetAngle()")
+    raw = robot.raw.send_raw("GetAngle()")
     print(f"Raw GetAngle() response: {raw}")
 
     # Motion pre-checks: validate a move before executing it.
@@ -123,7 +119,7 @@ def demo_native_advanced(robot: DobotRobot) -> None:  # type: ignore[type-arg]
     # db.fc_set_stiffness(x=0, y=0, z=500, rx=0, ry=0, rz=0)
     # db.fc_set_damping(x=0, y=0, z=50, rx=0, ry=0, rz=0)
     # db.fc_set_force(x=0, y=0, z=5, rx=0, ry=0, rz=0)
-    # robot.fc_off()   # turn off via wrapper
+    # robot.force_control.fc_off()   # turn off via wrapper
 
     print("(Advanced native-only calls shown as comments above.)")
     _ = db  # suppress unused-variable warning
@@ -133,12 +129,12 @@ def main() -> None:
     """Run V4-only wrapper demos and native-access demos."""
     with DobotRobot.connect(ROBOT_IP, model=ROBOT_MODEL) as robot:
         print(f"Connected: {robot}")
-        robot.startup(speed=20)
+        robot.lifecycle.startup(speed=20)
 
         demo_v4_wrapper_methods(robot)
         demo_native_advanced(robot)
 
-        robot.shutdown()
+        robot.lifecycle.shutdown()
 
 
 if __name__ == "__main__":
