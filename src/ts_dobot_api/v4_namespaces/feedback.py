@@ -26,3 +26,14 @@ class FeedbackV4(Feedback):
         """Return the raw numpy feedback array."""
         fb = self._get_feedback(port)
         return fb.raw_feedback_data() if fb else None
+
+    def _get_feedback(self, port: int):
+        """Return the native V4 feedback connection for the requested port."""
+        if port == 30004:
+            return self.native.feedback
+        if port == 30005:
+            return self.native.feedback_30005
+        if port == 30006:
+            return self.native.feedback_30006
+
+        raise ValueError(f"Unsupported feedback port: {port}")
