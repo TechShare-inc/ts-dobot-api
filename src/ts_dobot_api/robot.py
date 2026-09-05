@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from loguru import logger
 
@@ -66,11 +66,11 @@ class DobotRobot(Generic[_T_Native]):
         if version is ApiVersion.V3:
             from .v3 import DobotRobotV3
 
-            robot = DobotRobotV3(ip, model, language=language)  # type: ignore
+            robot = cast(DobotRobot[object], DobotRobotV3(ip, model, language=language))
         elif version is ApiVersion.V4:
             from .v4 import DobotRobotV4
 
-            robot = DobotRobotV4(ip, model, language=language)  # type: ignore
+            robot = cast(DobotRobot[object], DobotRobotV4(ip, model, language=language))
         else:
             raise ValueError(f"Unsupported API: {version}")
 

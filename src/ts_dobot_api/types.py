@@ -39,10 +39,10 @@ class Pose:
 # version-specific and quite large (~70 fields).  We re-export whichever
 # the active adapter provides under this alias.
 # ---------------------------------------------------------------------------
-# The concrete FeedbackData from either SDK is compatible: both are frozen
-# dataclasses with ``from_numpy`` classmethod.  We intentionally do NOT
-# merge them into a single schema – the adapters return the native object
-# and we type-alias it here for documentation purposes.
+# Both SDKs expose frozen ``FeedbackData`` dataclasses with a ``from_numpy``
+# classmethod. We intentionally do not merge them into one schema: field names
+# and units remain protocol-specific, and this wrapper returns the native typed
+# object. Higher-level robot adapters own application-unit normalization.
 
 if TYPE_CHECKING:
     from dobot_api_v3 import FeedbackData as V3FeedbackData

@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from ..api_namespaces import Motion
 from ..exceptions import NotSupportedError
-
 from ._utils import _build_dyn_params, _pose_from_tuple
 
 if TYPE_CHECKING:
@@ -70,7 +69,7 @@ class MotionV3(Motion):
         raise NotSupportedError()
 
     def get_start_pose(self, trace_name: str) -> Pose:
-        return self.native.get_start_pose(trace_name)
+        return _pose_from_tuple(self.native.get_path_start_pose(trace_name))
 
     def joint_mov_j(
         self,
@@ -147,6 +146,18 @@ class MotionV3(Motion):
         """Servo (streaming) move in joint space."""
         return self.native.servo_j(j1, j2, j3, j4, j5, j6, t=t, lookahead_time=lookahead_time, gain=gain)
 
+    def servo_js(
+        self,
+        j1: float,
+        j2: float,
+        j3: float,
+        j4: float,
+        j5: float,
+        j6: float,
+    ) -> int:
+        """Use the V3-only simplified joint-servo command."""
+        return self.native.servo_js(j1, j2, j3, j4, j5, j6)
+
     def servo_p(
         self,
         x: float,
@@ -165,8 +176,11 @@ class MotionV3(Motion):
         *,
         is_const: int = -1,
         multi: float = -1.0,
+        cart: int = -1,
     ) -> int:
-        return self.native.start_path(trace_name, is_const, multi)
+        if multi != -1.0:
+            raise NotSupportedError("The multi option is available only in V4")
+        return self.native.start_path(trace_name, is_const, cart)
 
     def sync(self, timeout: float = 30.0) -> None:
         """Block until all queued motion commands have completed."""

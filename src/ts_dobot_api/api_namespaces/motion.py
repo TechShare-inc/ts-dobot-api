@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from . import RobotNamespace
+from ._base import RobotNamespace
 
 if TYPE_CHECKING:
     from ..types import Pose
@@ -81,6 +81,18 @@ class Motion(RobotNamespace[object]):
         gain: float = 500.0,
     ) -> int:
         """Servo (streaming) move in joint space."""
+        raise NotImplementedError
+
+    def servo_js(
+        self,
+        j1: float,
+        j2: float,
+        j3: float,
+        j4: float,
+        j5: float,
+        j6: float,
+    ) -> int:
+        """Use the simplified V3 joint-servo command when supported."""
         raise NotImplementedError
 
     def servo_p(
@@ -158,8 +170,9 @@ class Motion(RobotNamespace[object]):
         *,
         is_const: int = -1,
         multi: float = -1.0,
+        cart: int = -1,
     ) -> int:
-        """Play back a recorded trajectory file."""
+        """Play a path with protocol-specific V3 ``cart`` or V4 ``multi``."""
         raise NotImplementedError
 
     def get_start_pose(self, trace_name: str) -> Pose:

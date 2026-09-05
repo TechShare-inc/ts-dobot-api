@@ -19,6 +19,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "dobot-api-v3 @ git+https://github.com/TechShare-inc/TCP-IP-Python-V3.git@a60cc49f66b8668238063d650e90d4e76806dbbb",
+    "dobot-api-v4 @ git+https://github.com/TechShare-inc/TCP-IP-Python-V4.git@bd32fad593ac4c3775f5202e0aaaeccddf5d6c94",
     "numpy>=1.20.0",
     "loguru>=0.7.0",
     "python-i18n>=0.3.9",
@@ -74,10 +76,8 @@ python = "3.10.*"
 # entries, avoiding duplication. Vendor libraries are pinned to exact git commits.
 [tool.pixi.pypi-dependencies]
 ts-dobot-api = { path = ".", editable = true, extras = ["dev"] }
-# dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", tag = "3.0.0-alpha.3" }
-# dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", tag = "4.0.0-alpha.2" }
-dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", rev = "a60cc49" }
-dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", rev = "bd32fad" }
+dobot-api-v3 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V3", rev = "a60cc49f66b8668238063d650e90d4e76806dbbb" }
+dobot-api-v4 = { git = "https://github.com/TechShare-inc/TCP-IP-Python-V4", rev = "bd32fad593ac4c3775f5202e0aaaeccddf5d6c94" }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

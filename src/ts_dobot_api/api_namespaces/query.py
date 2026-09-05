@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from . import RobotNamespace
+from ._base import RobotNamespace
 
 if TYPE_CHECKING:
     from ..types import Pose
