@@ -4,7 +4,8 @@
 [![Version](https://img.shields.io/badge/version-1.0.0--alpha.1-orange)](https://github.com/TechShare-inc/ts-dobot-api)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-TechShare Dobot API wrapper.
+TechShare's unified interface for Dobot V3 and V4 robot APIs. The model passed
+to `DobotRobot.connect()` selects the protocol-specific implementation.
 
 ## Prerequisites
 
@@ -13,11 +14,8 @@ TechShare Dobot API wrapper.
 ## Setup
 
 ```bash
-# Clone with submodules
-git clone --recurse-submodules <repo-url>
-
-# Or initialize submodules after cloning
-git submodule update --init --recursive
+# Clone the repository
+git clone https://github.com/TechShare-inc/ts-dobot-api.git
 
 # Install in editable mode with dev dependencies
 pip install -e ".[dev]"
@@ -36,9 +34,22 @@ ruff check src/ tests/
 mypy src/
 ```
 
-## Submodules
+## Protocol selection
 
-| Submodule | Path | Branch |
-|-----------|------|--------|
-| TCP-IP-Python-V4 | `vendor/TCP-IP-Python-V4` | `ts-main` |
-| TCP-IP-Python-V3 | `vendor/TCP-IP-Python-V3` | `ts-main` |
+```python
+from ts_dobot_api import DobotRobot
+
+v3_robot = DobotRobot.connect("192.168.5.1", "NOVA")
+v4_robot = DobotRobot.connect("192.168.5.1", "NOVA_2S")
+```
+
+`NOVA` uses V3. `CR`, `NOVA_2S`, and `NOVA_NG` use V4. The pinned V3 and V4
+vendor packages are internal runtime dependencies and are installed
+automatically.
+
+Both protocols expose `motion.servo_j()`. The simplified `motion.servo_js()`
+command is preserved for V3 callers and raises `NotSupportedError` for V4,
+whose vendor protocol does not expose ServoJS. `feedback.feedback_data()`
+normalizes `q_actual` to radians and `qd_actual` to radians per second for both
+protocols; all other protocol-specific fields remain available through the
+returned object's `native` attribute.

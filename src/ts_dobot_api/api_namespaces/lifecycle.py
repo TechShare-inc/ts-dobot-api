@@ -4,24 +4,34 @@ Lifecycle management
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Protocol, cast
 
-from . import RobotNamespace
+from ._base import RobotNamespace
 
-if TYPE_CHECKING:
-    pass
+
+class _Reconnectable(Protocol):
+    def close(self) -> None: ...
+
+    def reconnect(self) -> None: ...
 
 
 class Lifecycle(RobotNamespace[object]):
     """Lifecycle management"""
 
+    def __init__(self, native: object) -> None:
+        super().__init__(native)
+        self._connected = True
+
     def disconnect(self) -> None:
         """Close all TCP connections."""
-        raise NotImplementedError
+        if self._connected:
+            cast(_Reconnectable, self.native).close()
+            self._connected = False
 
     def reconnect(self) -> None:
         """Re-establish all TCP connections."""
-        raise NotImplementedError
+        cast(_Reconnectable, self.native).reconnect()
+        self._connected = True
 
     def startup(
         self,

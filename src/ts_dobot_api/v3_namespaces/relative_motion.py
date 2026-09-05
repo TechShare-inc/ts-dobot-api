@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..api_namespaces import RelativeMotion
-
 from ._utils import _build_dyn_params
 
 if TYPE_CHECKING:

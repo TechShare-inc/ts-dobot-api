@@ -15,7 +15,7 @@ class ModbusV3(Modbus):
 
     native: V3Robot
 
-    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str = "") -> list | int | float:
+    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str = "") -> tuple[float, ...] | str:
         return self.native.get_hold_regs(index, addr, count, val_type)
 
     def modbus_close(self, index: int) -> None:
@@ -24,5 +24,12 @@ class ModbusV3(Modbus):
     def modbus_create(self, ip: str, port: int, slave_id: int, is_rtu: int = -1) -> int:
         return self.native.modbus_create(ip, port, slave_id, is_rtu)
 
-    def set_hold_regs(self, index: int, addr: int, count: int, val_tab: str | list, val_type: str = "") -> None:
+    def set_hold_regs(
+        self,
+        index: int,
+        addr: int,
+        count: int,
+        val_tab: str,
+        val_type: str = "",
+    ) -> None:
         self.native.set_hold_regs(index, addr, count, val_tab, val_type)

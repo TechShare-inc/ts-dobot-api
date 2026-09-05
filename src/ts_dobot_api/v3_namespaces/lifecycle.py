@@ -15,16 +15,6 @@ class LifecycleV3(Lifecycle):
 
     native: V3Robot
 
-    def disconnect(self) -> None:
-        """Close all TCP connections."""
-        if self.native is not None:
-            self.native.close()
-            self.native = None  # type: ignore[assignment]
-
-    def reconnect(self) -> None:
-        """Re-establish all TCP connections."""
-        self.native.reconnect()
-
     def shutdown(self) -> None:
         """Gracefully disable the robot arm."""
         self.native.shutdown()

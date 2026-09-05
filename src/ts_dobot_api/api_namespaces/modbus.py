@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from . import RobotNamespace
+from ._base import RobotNamespace
 
 if TYPE_CHECKING:
     pass
@@ -23,10 +23,17 @@ class Modbus(RobotNamespace[object]):
         """Close Modbus master station."""
         raise NotImplementedError
 
-    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str = "") -> list | int | float:
-        """Read holding registers."""
+    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str = "") -> tuple[float, ...] | str:
+        """Read holding registers in the native protocol response format."""
         raise NotImplementedError
 
-    def set_hold_regs(self, index: int, addr: int, count: int, val_tab: str | list, val_type: str = "") -> None:
+    def set_hold_regs(
+        self,
+        index: int,
+        addr: int,
+        count: int,
+        val_tab: str,
+        val_type: str = "",
+    ) -> None:
         """Write holding registers."""
         raise NotImplementedError

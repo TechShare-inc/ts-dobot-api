@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..api_namespaces import ForceControl
-
 from ._utils import _pose_from_v4
 
 if TYPE_CHECKING:

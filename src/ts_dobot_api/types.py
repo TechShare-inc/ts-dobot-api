@@ -6,9 +6,10 @@ these before returning them to user code.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeAlias
+from math import radians
+from typing import Protocol
 
 # ---------------------------------------------------------------------------
 # Pose – always a dataclass, even though V3 uses plain tuples internally.
@@ -34,21 +35,46 @@ class Pose:
         return iter(self.as_tuple())
 
 
-# ---------------------------------------------------------------------------
-# FeedbackData – thin re-export placeholder.  The actual data structure is
-# version-specific and quite large (~70 fields).  We re-export whichever
-# the active adapter provides under this alias.
-# ---------------------------------------------------------------------------
-# The concrete FeedbackData from either SDK is compatible: both are frozen
-# dataclasses with ``from_numpy`` classmethod.  We intentionally do NOT
-# merge them into a single schema – the adapters return the native object
-# and we type-alias it here for documentation purposes.
+class _NativeFeedback(Protocol):
+    """Fields shared by the pinned V3 and V4 feedback packets."""
 
-if TYPE_CHECKING:
-    from dobot_api_v3 import FeedbackData as V3FeedbackData
-    from dobot_api_v4 import FeedbackData as V4FeedbackData
+    @property
+    def test_value(self) -> int: ...
 
-FeedbackData: TypeAlias = "V3FeedbackData | V4FeedbackData"
+    @property
+    def q_actual(self) -> Sequence[float]: ...
+
+    @property
+    def qd_actual(self) -> Sequence[float]: ...
+
+    @property
+    def m_actual(self) -> Sequence[float]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class FeedbackData:
+    """Protocol-neutral feedback values in radians and radians per second.
+
+    Fields not normalized by this facade remain available through ``native``.
+    """
+
+    test_value: int
+    q_actual: tuple[float, ...]
+    qd_actual: tuple[float, ...]
+    m_actual: tuple[float, ...]
+    native: object
+
+    @classmethod
+    def from_native(cls, native: _NativeFeedback, *, angular_values_in_degrees: bool) -> FeedbackData:
+        """Normalize the common joint fields from a vendor feedback packet."""
+        convert = radians if angular_values_in_degrees else float
+        return cls(
+            test_value=int(native.test_value),
+            q_actual=tuple(convert(value) for value in native.q_actual),
+            qd_actual=tuple(convert(value) for value in native.qd_actual),
+            m_actual=tuple(float(value) for value in native.m_actual),
+            native=native,
+        )
 
 
 # ---------------------------------------------------------------------------

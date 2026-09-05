@@ -37,9 +37,7 @@ class TestRobotFamily:
             ("nova_ng", RobotFamily.NOVA_NG, ApiVersion.V4),
         ],
     )
-    def test_from_model(
-        self, model: str, expected_family: RobotFamily, expected_version: ApiVersion
-    ) -> None:
+    def test_from_model(self, model: str, expected_family: RobotFamily, expected_version: ApiVersion) -> None:
         family = RobotFamily.from_model(model)
         assert family is expected_family
         assert family.api_version is expected_version
@@ -80,9 +78,7 @@ class TestRobotFamily:
             (RobotFamily.NOVA_NG, ApiVersion.V4),
         ],
     )
-    def test_api_version_property(
-        self, family: RobotFamily, expected_version: ApiVersion
-    ) -> None:
+    def test_api_version_property(self, family: RobotFamily, expected_version: ApiVersion) -> None:
         assert family.api_version is expected_version
 
     def test_resolve_api_version_shortcut(self) -> None:

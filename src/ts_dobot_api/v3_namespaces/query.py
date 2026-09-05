@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..api_namespaces import Query
-
+from ..exceptions import NotSupportedError
 from ._utils import _pose_from_tuple
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ class QueryV3(Query):
         return _pose_from_tuple(self.native.get_angle())
 
     def get_current_command_id(self) -> int:
-        return self.native.get_current_command_id()
+        raise NotSupportedError("Current command ID is not available in the V3 vendor API")
 
     def get_error_id(self) -> tuple[int, ...]:
         """Return a tuple of currently-active error IDs."""
@@ -46,7 +46,7 @@ class QueryV3(Query):
         user: int = -1,
         tool: int = -1,
     ) -> Pose:
-        return self.native.inverse_solution(x, y, z, rx, ry, rz, user, tool)
+        return _pose_from_tuple(self.native.inverse_solution(x, y, z, rx, ry, rz, user, tool))
 
     def positive_kin(
         self,
@@ -60,7 +60,7 @@ class QueryV3(Query):
         user: int = -1,
         tool: int = -1,
     ) -> Pose:
-        return self.native.positive_solution(j1, j2, j3, j4, j5, j6, user, tool)
+        return _pose_from_tuple(self.native.positive_solution(j1, j2, j3, j4, j5, j6, user, tool))
 
     def robot_mode(self) -> int:
         """Return the current robot mode."""

@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ..api_namespaces import Feedback
+from ..types import FeedbackData
 
 if TYPE_CHECKING:
-    import numpy as np
-
+    from dobot_api_v4 import DobotApiFeedback
     from dobot_api_v4 import DobotRobot as V4Robot
+    from numpy.typing import NDArray
 
 
 class FeedbackV4(Feedback):
@@ -17,17 +18,20 @@ class FeedbackV4(Feedback):
 
     native: V4Robot
 
-    def feedback_data(self, port: int = 30004) -> object | None:
+    def feedback_data(self, port: int = 30004) -> FeedbackData | None:
         """Return the latest real-time feedback packet."""
         fb = self._get_feedback(port)
-        return fb.feedback_data() if fb else None
+        packet = fb.feedback_data() if fb else None
+        if packet is None:
+            return None
+        return FeedbackData.from_native(packet, angular_values_in_degrees=True)
 
-    def raw_feedback_data(self, port: int = 30004) -> np.ndarray | None:
+    def raw_feedback_data(self, port: int = 30004) -> NDArray[Any] | None:
         """Return the raw numpy feedback array."""
         fb = self._get_feedback(port)
         return fb.raw_feedback_data() if fb else None
 
-    def _get_feedback(self, port: int):
+    def _get_feedback(self, port: int) -> DobotApiFeedback | None:
         """Return the native V4 feedback connection for the requested port."""
         if port == 30004:
             return self.native.feedback

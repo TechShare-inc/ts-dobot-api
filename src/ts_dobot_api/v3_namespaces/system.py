@@ -49,7 +49,7 @@ class SystemV3(System):
         self.native.reset_robot()
 
     def resume_script(self) -> None:
-        self.native.resume_script()
+        self.native.resume()
 
     def run_script(self, project_name: str) -> None:
         self.native.run_script(project_name)

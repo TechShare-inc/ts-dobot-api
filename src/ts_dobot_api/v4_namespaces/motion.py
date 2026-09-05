@@ -6,7 +6,7 @@ import time
 from typing import TYPE_CHECKING
 
 from ..api_namespaces import Motion
-
+from ..exceptions import NotSupportedError
 from ._utils import _opt, _pose_from_v4
 
 if TYPE_CHECKING:
@@ -222,6 +222,18 @@ class MotionV4(Motion):
         """Servo (streaming) move in joint space."""
         return self.native.servo_j(j1, j2, j3, j4, j5, j6, t=t, ahead_time=lookahead_time, gain=gain)
 
+    def servo_js(
+        self,
+        j1: float,
+        j2: float,
+        j3: float,
+        j4: float,
+        j5: float,
+        j6: float,
+    ) -> int:
+        """Reject the V3-only simplified joint-servo command."""
+        raise NotSupportedError("ServoJS is available only through the V3 protocol")
+
     def servo_p(
         self,
         x: float,
@@ -240,8 +252,11 @@ class MotionV4(Motion):
         *,
         is_const: int = -1,
         multi: float = -1.0,
+        cart: int = -1,
     ) -> int:
         """Play back a recorded trajectory file."""
+        if cart != -1:
+            raise NotSupportedError("The cart option is available only in V3")
         return self.native.dashboard.start_path(trace_name, is_const=is_const, multi=multi)
 
     def sync(self, timeout: float = 30.0) -> None:
@@ -258,20 +273,20 @@ class MotionV4(Motion):
             TimeoutError: If the motion does not complete within *timeout* seconds.
             RuntimeError: If the robot enters ERROR state.
         """
-        _MODE_ENABLE = 5
-        _MODE_RUNNING = 7
-        _MODE_SINGLE_MOVE = 8
-        _MODE_ERROR = 9
+        mode_enable = 5
+        mode_running = 7
+        mode_single_move = 8
+        mode_error = 9
 
         deadline = time.monotonic() + timeout
         saw_moving = False
         while time.monotonic() < deadline:
             mode = self.native.robot_mode()
-            if mode in (_MODE_RUNNING, _MODE_SINGLE_MOVE):
+            if mode in (mode_running, mode_single_move):
                 saw_moving = True
-            elif saw_moving and mode == _MODE_ENABLE:
+            elif saw_moving and mode == mode_enable:
                 return
-            elif mode == _MODE_ERROR:
+            elif mode == mode_error:
                 raise RuntimeError("Robot entered ERROR state during sync().")
             time.sleep(0.05)
         raise TimeoutError(f"sync() timed out after {timeout}s — motion did not complete.")
