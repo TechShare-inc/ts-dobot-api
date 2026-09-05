@@ -10,22 +10,32 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from ts_dobot_api import ApiVersion, DobotRobot, DobotRobotV3, DobotRobotV4
+from ts_dobot_api import (
+    ApiVersion,
+    DobotRobot,
+    DobotRobotV3,
+    DobotRobotV4,
+    FeedbackData,
+)
 from ts_dobot_api.exceptions import NotSupportedError
 
 
 class _FeedbackPacket:
     """Small structural stand-in for either vendor's typed feedback packet."""
 
-    test_value = 0x123456789ABCDEF
-    q_actual = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
-    qd_actual = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
-    m_actual = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    def __init__(self, q_actual: tuple[float, ...], qd_actual: tuple[float, ...]) -> None:
+        self.test_value = 0x123456789ABCDEF
+        self.q_actual = q_actual
+        self.qd_actual = qd_actual
+        self.m_actual = (1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
 
 
 class _FeedbackStream:
     def __init__(self, marker: int) -> None:
-        self.packet = _FeedbackPacket()
+        self.packet = _FeedbackPacket(
+            (0.0, 90.0, -90.0, 180.0, -180.0, 45.0),
+            (0.0, 9.0, -9.0, 18.0, -18.0, 4.5),
+        )
         self.raw = np.array([marker], dtype=np.int64)
 
     def feedback_data(self) -> _FeedbackPacket:
@@ -43,7 +53,10 @@ class _FakeV3Robot:
         self.language = language
         self.dashboard = self
         self.calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = []
-        self.packet = _FeedbackPacket()
+        self.packet = _FeedbackPacket(
+            (0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, np.pi / 4),
+            (0.0, np.pi / 20, -np.pi / 20, np.pi / 10, -np.pi / 10, np.pi / 40),
+        )
         self.raw = np.array([3], dtype=np.int64)
         type(self).last_instance = self
 
@@ -73,6 +86,13 @@ class _FakeV3Robot:
     def close(self) -> None:
         self.calls.append(("close", (), {}))
 
+    def reconnect(self) -> None:
+        self.calls.append(("reconnect", (), {}))
+
+    def resume(self) -> int:
+        self.calls.append(("resume", (), {}))
+        return 0
+
     def ao_execute(self, index: int, value: float) -> int:
         self.calls.append(("ao_execute", (index, value), {}))
         return 0
@@ -101,6 +121,22 @@ class _FakeV3Robot:
         self.calls.append(("start_path", (trace_name, const, cart), {}))
         return 33
 
+    def modbus_create(self, ip: str, port: int, slave_id: int, is_rtu: int) -> int:
+        self.calls.append(("modbus_create", (ip, port, slave_id, is_rtu), {}))
+        return 7
+
+    def modbus_close(self, index: int) -> int:
+        self.calls.append(("modbus_close", (index,), {}))
+        return 0
+
+    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str) -> tuple[float, ...]:
+        self.calls.append(("get_hold_regs", (index, addr, count, val_type), {}))
+        return (1.0, 2.0)
+
+    def set_hold_regs(self, index: int, addr: int, count: int, values: str, val_type: str) -> int:
+        self.calls.append(("set_hold_regs", (index, addr, count, values, val_type), {}))
+        return 0
+
 
 class _FakeV4Robot:
     last_instance: ClassVar[_FakeV4Robot | None] = None
@@ -108,6 +144,7 @@ class _FakeV4Robot:
     def __init__(self, ip: str, *, language: str = "en") -> None:
         self.ip = ip
         self.language = language
+        self.dashboard = self
         self.calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = []
         self.feedback = _FeedbackStream(4)
         self.feedback_30005 = _FeedbackStream(5)
@@ -126,6 +163,20 @@ class _FakeV4Robot:
 
     def close(self) -> None:
         self.calls.append(("close", (), {}))
+
+    def reconnect(self) -> None:
+        self.calls.append(("reconnect", (), {}))
+
+    def start_path(self, trace_name: str, *, is_const: int, multi: float) -> int:
+        self.calls.append(("start_path", (trace_name,), {"is_const": is_const, "multi": multi}))
+        return 43
+
+    def get_hold_regs(self, index: int, addr: int, count: int, val_type: str) -> str:
+        self.calls.append(("get_hold_regs", (index, addr, count, val_type), {}))
+        return "0,{1,2},GetHoldRegs();"
+
+    def set_hold_regs(self, index: int, addr: int, count: int, values: str, val_type: str) -> None:
+        self.calls.append(("set_hold_regs", (index, addr, count, values, val_type), {}))
 
 
 @pytest.fixture(autouse=True)
@@ -202,11 +253,11 @@ def test_v3_feedback_preserves_native_packet_and_raw_data() -> None:
     robot = DobotRobot.connect("192.0.2.3", "NOVA")
     native = cast(_FakeV3Robot, robot.native)
 
-    packet = cast(_FeedbackPacket, robot.feedback.feedback_data())
+    packet = cast(FeedbackData, robot.feedback.feedback_data())
     raw = robot.feedback.raw_feedback_data()
 
-    assert packet is native.packet
-    assert packet.q_actual == (1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+    assert packet.native is native.packet
+    assert packet.q_actual == pytest.approx((0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, np.pi / 4))
     assert raw is native.raw
     with pytest.raises(ValueError, match="Unsupported feedback port for V3"):
         robot.feedback.feedback_data(port=30005)
@@ -222,8 +273,9 @@ def test_v4_feedback_selects_requested_port(port: int) -> None:
         30006: native.feedback_30006,
     }[port]
 
-    packet = cast(_FeedbackPacket, robot.feedback.feedback_data(port=port))
-    assert packet is stream.packet
+    packet = cast(FeedbackData, robot.feedback.feedback_data(port=port))
+    assert packet.native is stream.packet
+    assert packet.q_actual == pytest.approx((0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, np.pi / 4))
     assert robot.feedback.raw_feedback_data(port=port) is stream.raw
 
 
@@ -232,6 +284,18 @@ def test_v4_feedback_rejects_unknown_port() -> None:
 
     with pytest.raises(ValueError, match="Unsupported feedback port: 12345"):
         robot.feedback.feedback_data(port=12345)
+
+
+def test_v3_and_v4_feedback_share_normalized_units() -> None:
+    v3 = DobotRobot.connect("192.0.2.3", "NOVA")
+    v4 = DobotRobot.connect("192.0.2.4", "NOVA_2S")
+
+    v3_packet = cast(FeedbackData, v3.feedback.feedback_data())
+    v4_packet = cast(FeedbackData, v4.feedback.feedback_data())
+
+    assert v4_packet.q_actual == pytest.approx(v3_packet.q_actual)
+    assert v4_packet.qd_actual == pytest.approx(v3_packet.qd_actual)
+    assert v4_packet.m_actual == v3_packet.m_actual
 
 
 def test_v3_servo_contract_and_servojs_compatibility() -> None:
@@ -304,3 +368,61 @@ def test_v3_pose_and_path_results_use_unified_types() -> None:
     assert path_id == 33
     with pytest.raises(NotSupportedError, match="multi option"):
         robot.motion.start_path("path.csv", multi=2.0)
+
+
+@pytest.mark.parametrize("model", ["NOVA", "NOVA_2S"])
+def test_lifecycle_reconnect_allows_a_later_disconnect(model: str) -> None:
+    robot = DobotRobot.connect("192.0.2.5", model)
+    native = cast(_FakeV3Robot | _FakeV4Robot, robot.native)
+
+    robot.lifecycle.disconnect()
+    robot.lifecycle.reconnect()
+    robot.lifecycle.disconnect()
+
+    assert [name for name, _, _ in native.calls] == ["close", "reconnect", "close"]
+
+
+def test_v3_unsupported_queries_and_namespaces_fail_explicitly() -> None:
+    robot = DobotRobot.connect("192.0.2.3", "NOVA")
+
+    for query in (
+        robot.io.get_ao,
+        robot.io.get_do,
+        robot.io.get_tool_do,
+        robot.io.tool_ai,
+    ):
+        with pytest.raises(NotSupportedError):
+            query(1)
+    with pytest.raises(NotSupportedError, match="Welding namespace"):
+        robot.welding.weave_start()
+
+
+def test_v3_resume_and_modbus_use_pinned_vendor_contract() -> None:
+    robot = DobotRobot.connect("192.0.2.3", "NOVA")
+    native = cast(_FakeV3Robot, robot.native)
+
+    robot.system.resume_script()
+    index = robot.modbus.modbus_create("192.0.2.10", 502, 1, 0)
+    values = robot.modbus.get_hold_regs(index, 100, 2, "F32")
+    robot.modbus.set_hold_regs(index, 100, 2, "{1,2}", "F32")
+    robot.modbus.modbus_close(index)
+
+    assert index == 7
+    assert values == (1.0, 2.0)
+    assert [name for name, _, _ in native.calls] == [
+        "resume",
+        "modbus_create",
+        "get_hold_regs",
+        "set_hold_regs",
+        "modbus_close",
+    ]
+
+
+def test_v4_modbus_and_path_options_use_pinned_vendor_contract() -> None:
+    robot = DobotRobot.connect("192.0.2.4", "CR")
+
+    assert robot.modbus.get_hold_regs(2, 100, 2, "U16") == "0,{1,2},GetHoldRegs();"
+    robot.modbus.set_hold_regs(2, 100, 2, "{1,2}", "U16")
+    assert robot.motion.start_path("path.csv", is_const=1, multi=2.0) == 43
+    with pytest.raises(NotSupportedError, match="cart option"):
+        robot.motion.start_path("path.csv", cart=1)

@@ -49,6 +49,7 @@ automatically.
 
 Both protocols expose `motion.servo_j()`. The simplified `motion.servo_js()`
 command is preserved for V3 callers and raises `NotSupportedError` for V4,
-whose vendor protocol does not expose ServoJS. Feedback packets remain the
-native typed packet for the selected protocol; higher-level adapters normalize
-protocol-specific units.
+whose vendor protocol does not expose ServoJS. `feedback.feedback_data()`
+normalizes `q_actual` to radians and `qd_actual` to radians per second for both
+protocols; all other protocol-specific fields remain available through the
+returned object's `native` attribute.

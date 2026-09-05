@@ -5,7 +5,7 @@ __version__ = "1.0.0-alpha.1"
 from .exceptions import NotSupportedError, TsDobotError
 from .models import ApiVersion, RobotFamily
 from .robot import DobotRobot
-from .types import AlarmInfo, Pose
+from .types import AlarmInfo, FeedbackData, Pose
 from .v3 import DobotRobotV3
 from .v4 import DobotRobotV4
 
@@ -16,6 +16,7 @@ __all__ = [
     "ApiVersion",
     "RobotFamily",
     "Pose",
+    "FeedbackData",
     "AlarmInfo",
     "TsDobotError",
     "NotSupportedError",

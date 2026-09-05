@@ -4,12 +4,28 @@ Lifecycle management
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from ._base import RobotNamespace
 
-if TYPE_CHECKING:
-    pass
+
+class _Reconnectable(Protocol):
+    def close(self) -> None: ...
+
+    def reconnect(self) -> None: ...
+
+
+def _disconnect_once(native: _Reconnectable, connected: bool) -> bool:
+    """Close a native client at most once and return its new state."""
+    if connected:
+        native.close()
+    return False
+
+
+def _reconnect(native: _Reconnectable) -> bool:
+    """Reconnect a native client and return its new state."""
+    native.reconnect()
+    return True
 
 
 class Lifecycle(RobotNamespace[object]):
