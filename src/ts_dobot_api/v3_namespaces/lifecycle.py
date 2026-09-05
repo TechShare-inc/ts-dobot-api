@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..api_namespaces import Lifecycle
-from ..api_namespaces.lifecycle import _disconnect_once, _reconnect
 
 if TYPE_CHECKING:
     from dobot_api_v3 import DobotRobot as V3Robot
@@ -15,18 +14,6 @@ class LifecycleV3(Lifecycle):
     """Concrete Lifecycle implementation for V3 API."""
 
     native: V3Robot
-
-    def __init__(self, native: V3Robot) -> None:
-        super().__init__(native)
-        self._connected = True
-
-    def disconnect(self) -> None:
-        """Close all TCP connections."""
-        self._connected = _disconnect_once(self.native, self._connected)
-
-    def reconnect(self) -> None:
-        """Re-establish all TCP connections."""
-        self._connected = _reconnect(self.native)
 
     def shutdown(self) -> None:
         """Gracefully disable the robot arm."""

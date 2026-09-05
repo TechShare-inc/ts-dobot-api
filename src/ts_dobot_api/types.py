@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from math import radians
-from typing import Any, Protocol
+from typing import Protocol
 
 # ---------------------------------------------------------------------------
 # Pose – always a dataclass, even though V3 uses plain tuples internally.
@@ -75,10 +75,6 @@ class FeedbackData:
             m_actual=tuple(float(value) for value in native.m_actual),
             native=native,
         )
-
-    def __getattr__(self, name: str) -> Any:
-        """Expose protocol-specific fields from the original packet."""
-        return getattr(self.native, name)
 
 
 # ---------------------------------------------------------------------------

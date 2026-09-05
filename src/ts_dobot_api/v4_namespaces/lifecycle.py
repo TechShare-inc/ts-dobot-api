@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 from loguru import logger
 
 from ..api_namespaces import Lifecycle
-from ..api_namespaces.lifecycle import _disconnect_once, _reconnect
 
 if TYPE_CHECKING:
     from dobot_api_v4 import DobotRobot as V4Robot
@@ -22,15 +21,6 @@ class LifecycleV4(Lifecycle):
     def __init__(self, native: V4Robot, *, language: str = "en") -> None:
         super().__init__(native)
         self._language = language
-        self._connected = True
-
-    def disconnect(self) -> None:
-        """Close all TCP connections."""
-        self._connected = _disconnect_once(self.native, self._connected)
-
-    def reconnect(self) -> None:
-        """Re-establish all TCP connections."""
-        self._connected = _reconnect(self.native)
 
     def shutdown(self) -> None:
         """Gracefully disable the robot arm."""

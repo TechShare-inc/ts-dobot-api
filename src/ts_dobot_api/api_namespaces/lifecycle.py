@@ -4,7 +4,7 @@ Lifecycle management
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, cast
 
 from ._base import RobotNamespace
 
@@ -15,29 +15,23 @@ class _Reconnectable(Protocol):
     def reconnect(self) -> None: ...
 
 
-def _disconnect_once(native: _Reconnectable, connected: bool) -> bool:
-    """Close a native client at most once and return its new state."""
-    if connected:
-        native.close()
-    return False
-
-
-def _reconnect(native: _Reconnectable) -> bool:
-    """Reconnect a native client and return its new state."""
-    native.reconnect()
-    return True
-
-
 class Lifecycle(RobotNamespace[object]):
     """Lifecycle management"""
 
+    def __init__(self, native: object) -> None:
+        super().__init__(native)
+        self._connected = True
+
     def disconnect(self) -> None:
         """Close all TCP connections."""
-        raise NotImplementedError
+        if self._connected:
+            cast(_Reconnectable, self.native).close()
+            self._connected = False
 
     def reconnect(self) -> None:
         """Re-establish all TCP connections."""
-        raise NotImplementedError
+        cast(_Reconnectable, self.native).reconnect()
+        self._connected = True
 
     def startup(
         self,
