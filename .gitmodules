@@ -5,4 +5,4 @@
 [submodule "vendor/TCP-IP-Python-V3"]
 	path = vendor/TCP-IP-Python-V3
 	url = https://github.com/TechShare-inc/TCP-IP-Python-V3.git
-	branch = ts-main
+	branch = pin/dev-eebfa4e
