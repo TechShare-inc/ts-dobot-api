@@ -24,7 +24,11 @@ class FeedbackV4(Feedback):
         packet = fb.feedback_data() if fb else None
         if packet is None:
             return None
-        return FeedbackData.from_native(packet, angular_values_in_degrees=True)
+        return FeedbackData.from_native(
+            packet,
+            position_values_in_degrees=True,
+            velocity_values_in_degrees=True,
+        )
 
     def raw_feedback_data(self, port: int = 30004) -> NDArray[Any] | None:
         """Return the raw numpy feedback array."""
