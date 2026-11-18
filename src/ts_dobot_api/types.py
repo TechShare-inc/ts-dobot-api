@@ -65,13 +65,20 @@ class FeedbackData:
     native: object
 
     @classmethod
-    def from_native(cls, native: _NativeFeedback, *, angular_values_in_degrees: bool) -> FeedbackData:
-        """Normalize the common joint fields from a vendor feedback packet."""
-        convert = radians if angular_values_in_degrees else float
+    def from_native(
+        cls,
+        native: _NativeFeedback,
+        *,
+        position_values_in_degrees: bool,
+        velocity_values_in_degrees: bool,
+    ) -> FeedbackData:
+        """Normalize joint positions and velocities independently."""
+        convert_position = radians if position_values_in_degrees else float
+        convert_velocity = radians if velocity_values_in_degrees else float
         return cls(
             test_value=int(native.test_value),
-            q_actual=tuple(convert(value) for value in native.q_actual),
-            qd_actual=tuple(convert(value) for value in native.qd_actual),
+            q_actual=tuple(convert_position(value) for value in native.q_actual),
+            qd_actual=tuple(convert_velocity(value) for value in native.qd_actual),
             m_actual=tuple(float(value) for value in native.m_actual),
             native=native,
         )

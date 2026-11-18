@@ -54,7 +54,7 @@ class _FakeV3Robot:
         self.dashboard = self
         self.calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = []
         self.packet = _FeedbackPacket(
-            (0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, np.pi / 4),
+            (0.0, 90.0, -90.0, 180.0, -180.0, 45.0),
             (0.0, np.pi / 20, -np.pi / 20, np.pi / 10, -np.pi / 10, np.pi / 40),
         )
         self.raw = np.array([3], dtype=np.int64)
@@ -258,6 +258,7 @@ def test_v3_feedback_preserves_native_packet_and_raw_data() -> None:
 
     assert packet.native is native.packet
     assert packet.q_actual == pytest.approx((0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, np.pi / 4))
+    assert packet.qd_actual == pytest.approx(native.packet.qd_actual)
     assert raw is native.raw
     with pytest.raises(ValueError, match="Unsupported feedback port for V3"):
         robot.feedback.feedback_data(port=30005)

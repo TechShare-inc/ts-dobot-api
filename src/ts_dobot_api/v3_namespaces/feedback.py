@@ -27,7 +27,13 @@ class FeedbackV3(Feedback):
         packet = self.native.feedback_data()
         if packet is None:
             return None
-        return FeedbackData.from_native(packet, angular_values_in_degrees=False)
+        # Nova 2 feedback positions were measured in degrees against GetAngle().
+        # Keep velocity handling unchanged until its native unit is verified.
+        return FeedbackData.from_native(
+            packet,
+            position_values_in_degrees=True,
+            velocity_values_in_degrees=False,
+        )
 
     def raw_feedback_data(self, port: int = 30004) -> NDArray[Any] | None:
         """Return the raw numpy feedback array."""
